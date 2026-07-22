@@ -1,0 +1,65 @@
+name: Rollback - Revertir último deploy en Render
+
+on:
+  workflow_dispatch:
+    inputs:
+      motivo:
+        description: 'Motivo del rollback'
+        required: false
+        default: 'Rollback manual solicitado'
+
+  workflow_call:
+    inputs:
+      motivo:
+        description: 'Motivo del rollback'
+        required: false
+        type: string
+        default: 'Rollback automático desde CD'
+
+jobs:
+  rollback:
+    name: Rollback al último deploy exitoso
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Obtener lista de deploys de Render
+        id: get_deploys
+        run: |
+          echo "Consultando deploys del servicio ${{ secrets.RENDER_SERVICE_ID }}..."
+
+          RESPONSE=$(curl -s --fail \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Accept: application/json" \
+            "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys?limit=10")
+
+          echo "Respuesta de Render API:"
+          echo "$RESPONSE" | python3 -m json.tool || echo "$RESPONSE"
+
+          LAST_LIVE_ID=$(echo "$RESPONSE" | python3 -c "
+          import sys, json
+          deploys = json.load(sys.stdin)
+          live = [d['deploy']['id'] for d in deploys if d['deploy']['status'] == 'live']
+          print(live[0] if live else '')
+          ")
+
+          echo "Último deploy exitoso encontrado: $LAST_LIVE_ID"
+          echo "deploy_id=$LAST_LIVE_ID" >> $GITHUB_OUTPUT
+
+      - name: Verificar que existe un deploy exitoso
+        run: |
+          if [ -z "${{ steps.get_deploys.outputs.deploy_id }}" ]; then
+            echo "❌ No se encontró ningún deploy exitoso para revertir."
+            exit 1
+          fi
+          echo "✅ Deploy a revertir: ${{ steps.get_deploys.outputs.deploy_id }}"
+
+      - name: Ejecutar rollback en Render
+        run: |
+          echo "Revirtiendo al deploy: ${{ steps.get_deploys.outputs.deploy_id }}"
+
+          curl -s --fail -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Accept: application/json" \
+            "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys/${{ steps.get_deploys.outputs.deploy_id }}/rollback"
+
+          echo "✅ Rollback ejecutado exitosamente en Render."
