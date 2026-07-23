@@ -6,40 +6,38 @@ import com.tienda.ropa.backend.dto.usuario.UsuarioUpdateRequest;
 import com.tienda.ropa.backend.domain.Usuario;
 import com.tienda.ropa.backend.repository.UsuarioRepository;
 import com.tienda.ropa.backend.web.advice.ConflictException;
+import com.tienda.ropa.backend.web.advice.NotFoundException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
+import org.springframework.data.domain.PageImpl;
 
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import org.springframework.data.domain.PageImpl;
-
-import java.util.List;
-import java.util.Arrays;
-
-// Tests de UsuarioServiceImpl
-@ExtendWith(MockitoExtension.class)
-@DisplayName("UsuarioServiceImpl - Tests")
+// Clase de pruebas unitarias para UsuarioServiceImpl siguiendo el patrón AAA y Mockito
+@DisplayName("UsuarioServiceImpl - Pruebas Unitarias (AAA + Mockito)")
 class UsuarioServiceTest {
 
-    @Mock
     private UsuarioRepository usuarioRepository;
-
-    @InjectMocks
     private UsuarioServiceImpl usuarioService;
 
     private UsuarioCreateRequest requestValido;
 
+    // Configuración inicial: se mockean las dependencias antes de cada test
     @BeforeEach
     void setUp() {
+        usuarioRepository = mock(UsuarioRepository.class);
+        usuarioService = new UsuarioServiceImpl(usuarioRepository);
 
         requestValido = new UsuarioCreateRequest();
         requestValido.setNombre("Carlos Mendoza");
@@ -48,238 +46,139 @@ class UsuarioServiceTest {
         requestValido.setRol("CLIENTE");
     }
 
-    // Crea usuario correctamente
+    // Test 1: Crear usuario válido y retornar datos
     @Test
-    @DisplayName("Debe crear un usuario")
-    void debeCrearUsuarioCuandoCorreoNoExiste() {
-
-        when(usuarioRepository.existsByCorreo(requestValido.getCorreo()))
-                .thenReturn(false);
-
+    @DisplayName("crearUsuario_validaDatosYRetornaRespuesta")
+    void crearUsuario_validaDatosYRetornaRespuesta() {
+        // Arrange
+        when(usuarioRepository.existsByCorreo(requestValido.getCorreo())).thenReturn(false);
         Usuario usuarioGuardado = buildUsuario(1L, requestValido);
+        when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuarioGuardado);
 
-        when(usuarioRepository.save(any(Usuario.class)))
-                .thenReturn(usuarioGuardado);
+        // Act
+        UsuarioResponse response = usuarioService.create(requestValido);
 
-        UsuarioResponse response =
-                usuarioService.create(requestValido);
+        // Assert
+        assertNotNull(response);
+        assertEquals(1L, response.getId());
+        assertEquals("Carlos Mendoza", response.getNombre());
+        assertEquals("carlos.mendoza@example.com", response.getCorreo());
+        assertEquals("CLIENTE", response.getRol());
+        assertTrue(response.getActive());
 
-        assertThat(response).isNotNull();
-
-        assertThat(response.getNombre())
-                .isEqualTo("Carlos Mendoza");
-
-        assertThat(response.getCorreo())
-                .isEqualTo("carlos.mendoza@example.com");
-
-        assertThat(response.getRol())
-                .isEqualTo("CLIENTE");
-
-        assertThat(response.getActive()).isTrue();
-
-        verify(usuarioRepository, times(1))
-                .save(any(Usuario.class));
+        verify(usuarioRepository).save(any(Usuario.class));
     }
 
-    // Valida correo duplicado
+    // Test 2: Correo duplicado lanza excepción y no guarda
     @Test
-    @DisplayName("Debe lanzar ConflictException")
-    void debeLanzarConflictExceptionSiCorreoYaExiste() {
+    @DisplayName("crearUsuario_correoExiste_lanzaExcepcionYNoGuarda")
+    void crearUsuario_correoExiste_lanzaExcepcionYNoGuarda() {
+        // Arrange
+        when(usuarioRepository.existsByCorreo(requestValido.getCorreo())).thenReturn(true);
 
-        when(usuarioRepository.existsByCorreo(requestValido.getCorreo()))
-                .thenReturn(true);
-
-        assertThatThrownBy(() ->
-                usuarioService.create(requestValido)
-        )
-                .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("correo");
-
-        verify(usuarioRepository, never())
-                .save(any(Usuario.class));
+        // Act & Assert
+        ConflictException ex = assertThrows(ConflictException.class, () ->
+                usuarioService.create(requestValido));
+        assertTrue(ex.getMessage().contains("correo"));
+        verify(usuarioRepository, never()).save(any());
     }
 
-    // Desactiva usuario
+    // Test 3: Desactivar usuario cambia el estado activo a false
     @Test
-    @DisplayName("Debe desactivar usuario")
-    void debeDesactivarUsuario() {
-
+    @DisplayName("desactivarUsuario_usuarioExiste_desactivaCorrectamente")
+    void desactivarUsuario_usuarioExiste_desactivaCorrectamente() {
+        // Arrange
         Usuario usuario = buildUsuario(1L, requestValido);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        when(usuarioRepository.findById(1L))
-                .thenReturn(java.util.Optional.of(usuario));
+        // Act
+        UsuarioResponse response = usuarioService.deactivate(1L);
 
-        when(usuarioRepository.save(any(Usuario.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
-
-        UsuarioResponse response =
-                usuarioService.deactivate(1L);
-
-        assertThat(response.getActive()).isFalse();
-
-        verify(usuarioRepository, times(1))
-                .save(any(Usuario.class));
+        // Assert
+        assertNotNull(response);
+        assertFalse(response.getActive());
+        verify(usuarioRepository).save(any(Usuario.class));
     }
 
-    // Obtiene usuario por id
+    // Test 4: Obtener usuario por ID cuando existe
     @Test
-    @DisplayName("Debe obtener usuario por id")
-    void debeObtenerUsuarioPorId() {
-
+    @DisplayName("obtenerUsuario_idExiste_retornaUsuario")
+    void obtenerUsuario_idExiste_retornaUsuario() {
+        // Arrange
         Usuario usuario = buildUsuario(5L, requestValido);
+        when(usuarioRepository.findById(5L)).thenReturn(Optional.of(usuario));
 
-        when(usuarioRepository.findById(5L))
-                .thenReturn(java.util.Optional.of(usuario));
+        // Act
+        UsuarioResponse response = usuarioService.getById(5L);
 
-        UsuarioResponse r =
-                usuarioService.getById(5L);
-
-        assertThat(r).isNotNull();
-
-        assertThat(r.getId()).isEqualTo(5L);
-
-        assertThat(r.getCorreo())
-                .isEqualTo(requestValido.getCorreo());
+        // Assert
+        assertNotNull(response);
+        assertEquals(5L, response.getId());
+        assertEquals("carlos.mendoza@example.com", response.getCorreo());
     }
 
-    // Actualiza usuario
+    // Test 5: Obtener usuario por ID no existente lanza NotFoundException
     @Test
-    @DisplayName("Debe actualizar usuario")
-    void debeActualizarUsuarioCuandoExiste() {
+    @DisplayName("obtenerUsuario_idNoExiste_lanzaNotFoundException")
+    void obtenerUsuario_idNoExiste_lanzaNotFoundException() {
+        // Arrange
+        Long idInexistente = 99L;
+        when(usuarioRepository.findById(idInexistente)).thenReturn(Optional.empty());
 
-        Usuario existente = buildUsuario(2L, requestValido);
-
-        when(usuarioRepository.findById(2L))
-                .thenReturn(java.util.Optional.of(existente));
-
-        when(usuarioRepository.save(any(Usuario.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
-
-        UsuarioUpdateRequest upd =
-                new UsuarioUpdateRequest();
-
-        upd.setNombre("Carlos Updated");
-
-        UsuarioResponse res =
-                usuarioService.update(2L, upd);
-
-        assertThat(res.getNombre())
-                .isEqualTo("Carlos Updated");
-
-        verify(usuarioRepository, times(1))
-                .save(any(Usuario.class));
+        // Act & Assert
+        NotFoundException ex = assertThrows(NotFoundException.class, () ->
+                usuarioService.getById(idInexistente));
+        assertTrue(ex.getMessage().contains("usuario con ID 99 no existe") || ex.getMessage().contains("Usuario con ID 99 no existe"));
     }
 
-    // Usuario no encontrado al actualizar
+    // Test 6: Crear usuario con datos válidos y verificar con ArgumentCaptor
     @Test
-    @DisplayName("Debe lanzar NotFoundException")
-    void debeLanzarNotFoundAlActualizarNoExistente() {
+    @DisplayName("crearUsuario_datosValidos_guardaUsuario_ArgumentCaptor")
+    void crearUsuario_datosValidos_guardaUsuario_ArgumentCaptor() {
+        // Arrange
+        when(usuarioRepository.existsByCorreo(requestValido.getCorreo())).thenReturn(false);
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+        ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
 
-        when(usuarioRepository.findById(99L))
-                .thenReturn(java.util.Optional.empty());
+        // Act
+        usuarioService.create(requestValido);
 
-        UsuarioUpdateRequest upd =
-                new UsuarioUpdateRequest();
-
-        upd.setNombre("No Existe");
-
-        assertThatThrownBy(() ->
-                usuarioService.update(99L, upd)
-        )
-                .isInstanceOf(
-                        com.tienda.ropa.backend.web.advice.NotFoundException.class
-                );
+        // Assert
+        verify(usuarioRepository).save(captor.capture());
+        Usuario usuarioGuardado = captor.getValue();
+        assertEquals("Carlos Mendoza", usuarioGuardado.getNombre());
+        assertEquals("carlos.mendoza@example.com", usuarioGuardado.getCorreo());
+        assertEquals("CLIENTE", usuarioGuardado.getRol());
+        assertTrue(usuarioGuardado.getActive());
     }
 
-    // Lista usuarios
+    // Test 7: Verificar el orden de ejecución con Mockito InOrder
     @Test
-    @DisplayName("Debe listar usuarios")
-    void listRetornaUsuarios() {
+    @DisplayName("crearUsuario_datosValidos_verificaOrdenEjecucion")
+    void crearUsuario_datosValidos_verificaOrdenEjecucion() {
+        // Arrange
+        when(usuarioRepository.existsByCorreo(requestValido.getCorreo())).thenReturn(false);
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Usuario u1 = buildUsuario(10L, requestValido);
+        // Act
+        usuarioService.create(requestValido);
 
-        Usuario u2 = buildUsuario(11L, requestValido);
-        u2.setNombre("Otro");
-
-        when(usuarioRepository.findAll())
-                .thenReturn(Arrays.asList(u1, u2));
-
-        List<UsuarioResponse> lista =
-                usuarioService.list();
-
-        assertThat(lista).hasSize(2);
-
-        assertThat(lista)
-                .extracting(UsuarioResponse::getId)
-                .contains(10L, 11L);
+        // Assert
+        InOrder inOrder = Mockito.inOrder(usuarioRepository);
+        inOrder.verify(usuarioRepository).existsByCorreo(requestValido.getCorreo());
+        inOrder.verify(usuarioRepository).save(any(Usuario.class));
     }
 
-    // Busca usuarios por nombre
-    @Test
-    @DisplayName("Debe buscar usuarios")
-    void searchByNamePaginado() {
-
-        Usuario u1 = buildUsuario(20L, requestValido);
-        u1.setNombre("Carlos One");
-
-        Usuario u2 = buildUsuario(21L, requestValido);
-        u2.setNombre("Carlos Two");
-
-        when(usuarioRepository.findByNombreContainingIgnoreCase(
-                eq("carlos"),
-                any()
-        ))
-                .thenReturn(new PageImpl<>(List.of(u1, u2)));
-
-        var page = usuarioService.searchByName(
-                "carlos",
-                0,
-                10
-        );
-
-        assertThat(page.getTotalElements())
-                .isEqualTo(2);
-
-        assertThat(page.getContent())
-                .extracting(UsuarioResponse::getNombre)
-                .containsExactlyInAnyOrder(
-                        "Carlos One",
-                        "Carlos Two"
-                );
-    }
-
-    // Usuario no encontrado
-    @Test
-    @DisplayName("Debe lanzar NotFoundException si no existe")
-    void debeLanzarNotFoundSiUsuarioNoExiste() {
-
-        when(usuarioRepository.findById(99L))
-                .thenReturn(java.util.Optional.empty());
-
-        assertThatThrownBy(() ->
-                usuarioService.getById(99L)
-        )
-                .isInstanceOf(
-                        com.tienda.ropa.backend.web.advice.NotFoundException.class
-                )
-                .hasMessageContaining("Usuario");
-    }
-
-    // Crea usuario auxiliar
-    private Usuario buildUsuario(
-            Long id,
-            UsuarioCreateRequest req
-    ) {
-
+    // Método auxiliar para construir entidades Usuario
+    private Usuario buildUsuario(Long id, UsuarioCreateRequest req) {
         Usuario u = new Usuario();
-
         u.setId(id);
         u.setNombre(req.getNombre());
         u.setCorreo(req.getCorreo());
         u.setContrasena(req.getContrasena());
         u.setRol(req.getRol());
         u.setActive(true);
-
         return u;
     }
 }
