@@ -42,7 +42,9 @@ public class UsuarioServiceImpl implements UsuarioService {
             u.setActive(true);
 
             UsuarioResponse response = toResponse(repo.save(u));
-            usuarioReactiveService.publishUsuario(response);
+            if (usuarioReactiveService != null) {
+                usuarioReactiveService.publishUsuario(response);
+            }
             return response;
         }).subscribeOn(Schedulers.boundedElastic());
     }
@@ -76,7 +78,9 @@ public class UsuarioServiceImpl implements UsuarioService {
             u.setActive(false);
 
             UsuarioResponse response = toResponse(repo.save(u));
-            usuarioReactiveService.publishUsuario(response);
+            if (usuarioReactiveService != null) {
+                usuarioReactiveService.publishUsuario(response);
+            }
             return response;
         }).subscribeOn(Schedulers.boundedElastic());
     }
@@ -110,7 +114,9 @@ public class UsuarioServiceImpl implements UsuarioService {
                 u.setActive(request.getActive());
 
             UsuarioResponse response = toResponse(repo.save(u));
-            usuarioReactiveService.publishUsuario(response);
+            if (usuarioReactiveService != null) {
+                usuarioReactiveService.publishUsuario(response);
+            }
             return response;
         }).subscribeOn(Schedulers.boundedElastic());
     }

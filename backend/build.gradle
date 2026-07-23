@@ -49,7 +49,7 @@ task npmInstall(type: Exec) {
     if (isWindows) {
         commandLine 'npm.cmd', 'install'
     } else {
-        commandLine '/usr/bin/npm', 'install'
+        commandLine 'npm', 'install'
     }
 }
 
@@ -60,7 +60,7 @@ task buildFrontend(type: Exec) {
     if (isWindows) {
         commandLine 'npm.cmd', 'run', 'build'
     } else {
-        commandLine '/usr/bin/npm', 'run', 'build'
+        commandLine 'npm', 'run', 'build'
     }
 }
 

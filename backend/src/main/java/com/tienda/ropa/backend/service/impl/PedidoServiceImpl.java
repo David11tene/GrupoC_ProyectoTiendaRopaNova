@@ -105,7 +105,9 @@ public class PedidoServiceImpl implements PedidoService {
             pedido.setTotal(total);
 
             PedidoResponse response = toResponse(pedidoRepo.save(pedido));
-            pedidoReactiveService.publishPedido(response);
+            if (pedidoReactiveService != null) {
+                pedidoReactiveService.publishPedido(response);
+            }
             return response;
         }).subscribeOn(Schedulers.boundedElastic());
     }
@@ -173,7 +175,9 @@ public class PedidoServiceImpl implements PedidoService {
             pedido.setEstado(estadoNormalizado);
 
             PedidoResponse response = toResponse(pedidoRepo.save(pedido));
-            pedidoReactiveService.publishPedido(response);
+            if (pedidoReactiveService != null) {
+                pedidoReactiveService.publishPedido(response);
+            }
             return response;
         }).subscribeOn(Schedulers.boundedElastic());
     }

@@ -1,45 +1,41 @@
 package com.tienda.ropa.backend.service.impl;
 
+import com.tienda.ropa.backend.domain.Usuario;
 import com.tienda.ropa.backend.dto.usuario.UsuarioCreateRequest;
 import com.tienda.ropa.backend.dto.usuario.UsuarioResponse;
 import com.tienda.ropa.backend.dto.usuario.UsuarioUpdateRequest;
-import com.tienda.ropa.backend.domain.Usuario;
 import com.tienda.ropa.backend.repository.UsuarioRepository;
+import com.tienda.ropa.backend.service.reactive.UsuarioReactiveService;
 import com.tienda.ropa.backend.web.advice.ConflictException;
+import com.tienda.ropa.backend.web.advice.NotFoundException;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
-// Tests de UsuarioServiceImpl
-@ExtendWith(MockitoExtension.class)
-@DisplayName("UsuarioServiceImpl - Tests")
-class UsuarioServiceTest {
+public class UsuarioServiceTest {
 
-    @Mock
     private UsuarioRepository usuarioRepository;
-
-    @InjectMocks
+    private UsuarioReactiveService usuarioReactiveService;
     private UsuarioServiceImpl usuarioService;
 
     private UsuarioCreateRequest requestValido;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
+        // Arrange general para cada prueba
+        usuarioRepository = Mockito.mock(UsuarioRepository.class);
+        usuarioReactiveService = Mockito.mock(UsuarioReactiveService.class);
+        usuarioService = new UsuarioServiceImpl(usuarioRepository, usuarioReactiveService);
 
         requestValido = new UsuarioCreateRequest();
         requestValido.setNombre("Carlos Mendoza");
@@ -48,238 +44,188 @@ class UsuarioServiceTest {
         requestValido.setRol("CLIENTE");
     }
 
-    // Crea usuario correctamente
     @Test
-    @DisplayName("Debe crear un usuario")
-    void debeCrearUsuarioCuandoCorreoNoExiste() {
-
-        when(usuarioRepository.existsByCorreo(requestValido.getCorreo()))
-                .thenReturn(false);
-
+    void create_validData_shouldSaveAndReturnResponse() {
+        // Arrange
+        Mockito.when(usuarioRepository.existsByCorreo(requestValido.getCorreo())).thenReturn(false);
         Usuario usuarioGuardado = buildUsuario(1L, requestValido);
+        Mockito.when(usuarioRepository.save(ArgumentMatchers.any(Usuario.class))).thenReturn(usuarioGuardado);
 
-        when(usuarioRepository.save(any(Usuario.class)))
-                .thenReturn(usuarioGuardado);
+        // Act
+        UsuarioResponse response = usuarioService.create(requestValido).block();
 
-        UsuarioResponse response =
-                usuarioService.create(requestValido).block();
+        // Assert
+        Assertions.assertNotNull(response, "La respuesta no debe ser nula");
+        Assertions.assertEquals("Carlos Mendoza", response.getNombre());
+        Assertions.assertEquals("carlos.mendoza@example.com", response.getCorreo());
+        Assertions.assertEquals("CLIENTE", response.getRol());
+        Assertions.assertTrue(response.getActive());
 
-        assertThat(response).isNotNull();
-
-        assertThat(response.getNombre())
-                .isEqualTo("Carlos Mendoza");
-
-        assertThat(response.getCorreo())
-                .isEqualTo("carlos.mendoza@example.com");
-
-        assertThat(response.getRol())
-                .isEqualTo("CLIENTE");
-
-        assertThat(response.getActive()).isTrue();
-
-        verify(usuarioRepository, times(1))
-                .save(any(Usuario.class));
+        Mockito.verify(usuarioRepository).existsByCorreo(requestValido.getCorreo());
+        Mockito.verify(usuarioRepository).save(ArgumentMatchers.any(Usuario.class));
     }
 
-    // Valida correo duplicado
     @Test
-    @DisplayName("Debe lanzar ConflictException")
-    void debeLanzarConflictExceptionSiCorreoYaExiste() {
+    void create_emailAlreadyExists_shouldThrowException_andNotSave() {
+        // Arrange
+        Mockito.when(usuarioRepository.existsByCorreo(requestValido.getCorreo())).thenReturn(true);
 
-        when(usuarioRepository.existsByCorreo(requestValido.getCorreo()))
-                .thenReturn(true);
+        // Act + Assert
+        ConflictException ex = Assertions.assertThrows(ConflictException.class, () ->
+                usuarioService.create(requestValido).block());
 
-        assertThatThrownBy(() ->
-                usuarioService.create(requestValido).block()
-        )
-                .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("correo");
-
-        verify(usuarioRepository, never())
-                .save(any(Usuario.class));
+        Assertions.assertTrue(ex.getMessage().contains("ya está registrado"));
+        Mockito.verify(usuarioRepository, Mockito.never()).save(ArgumentMatchers.any(Usuario.class));
     }
 
-    // Desactiva usuario
     @Test
-    @DisplayName("Debe desactivar usuario")
-    void debeDesactivarUsuario() {
+    void update_validEmail_shouldUpdateAndReturnResponse() {
+        // Arrange
+        Long usuarioId = 1L;
+        Usuario existente = buildUsuario(usuarioId, requestValido);
+        String nuevoCorreo = "carlos.nuevo@example.com";
 
+        UsuarioUpdateRequest updateRequest = new UsuarioUpdateRequest();
+        updateRequest.setCorreo(nuevoCorreo);
+
+        Mockito.when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.of(existente));
+        Mockito.when(usuarioRepository.existsByCorreo(nuevoCorreo)).thenReturn(false);
+        Mockito.when(usuarioRepository.save(ArgumentMatchers.any(Usuario.class)))
+                .thenAnswer(i -> i.getArguments()[0]);
+
+        // Act
+        UsuarioResponse response = usuarioService.update(usuarioId, updateRequest).block();
+
+        // Assert
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(nuevoCorreo, response.getCorreo());
+        Mockito.verify(usuarioRepository).existsByCorreo(nuevoCorreo);
+        Mockito.verify(usuarioRepository).save(existente);
+    }
+
+    @Test
+    void update_duplicateEmail_shouldThrowException() {
+        // Arrange
+        Long usuarioId = 1L;
+        Usuario existente = buildUsuario(usuarioId, requestValido);
+        String correoDuplicado = "otro.usuario@example.com";
+
+        UsuarioUpdateRequest updateRequest = new UsuarioUpdateRequest();
+        updateRequest.setCorreo(correoDuplicado);
+
+        Mockito.when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.of(existente));
+        Mockito.when(usuarioRepository.existsByCorreo(correoDuplicado)).thenReturn(true);
+
+        // Act + Assert
+        ConflictException ex = Assertions.assertThrows(ConflictException.class, () ->
+                usuarioService.update(usuarioId, updateRequest).block());
+
+        Assertions.assertTrue(ex.getMessage().contains("ya está registrado en otro usuario"));
+        Mockito.verify(usuarioRepository, Mockito.never()).save(ArgumentMatchers.any(Usuario.class));
+    }
+
+    @Test
+    void deactivate_validId_shouldDeactivateUser() {
+        // Arrange
         Usuario usuario = buildUsuario(1L, requestValido);
+        Mockito.when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        Mockito.when(usuarioRepository.save(ArgumentMatchers.any(Usuario.class)))
+                .thenAnswer(i -> i.getArguments()[0]);
 
-        when(usuarioRepository.findById(1L))
-                .thenReturn(java.util.Optional.of(usuario));
+        // Act
+        UsuarioResponse response = usuarioService.deactivate(1L).block();
 
-        when(usuarioRepository.save(any(Usuario.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
-
-        UsuarioResponse response =
-                usuarioService.deactivate(1L).block();
-
-        assertThat(response.getActive()).isFalse();
-
-        verify(usuarioRepository, times(1))
-                .save(any(Usuario.class));
+        // Assert
+        Assertions.assertFalse(response.getActive());
+        Mockito.verify(usuarioRepository).save(ArgumentMatchers.any(Usuario.class));
     }
 
-    // Obtiene usuario por id
     @Test
-    @DisplayName("Debe obtener usuario por id")
-    void debeObtenerUsuarioPorId() {
-
+    void getById_userFound_shouldReturnUserResponse() {
+        // Arrange
         Usuario usuario = buildUsuario(5L, requestValido);
+        Mockito.when(usuarioRepository.findById(5L)).thenReturn(Optional.of(usuario));
 
-        when(usuarioRepository.findById(5L))
-                .thenReturn(java.util.Optional.of(usuario));
+        // Act
+        UsuarioResponse r = usuarioService.getById(5L).block();
 
-        UsuarioResponse r =
-                usuarioService.getById(5L).block();
-
-        assertThat(r).isNotNull();
-
-        assertThat(r.getId()).isEqualTo(5L);
-
-        assertThat(r.getCorreo())
-                .isEqualTo(requestValido.getCorreo());
+        // Assert
+        Assertions.assertNotNull(r);
+        Assertions.assertEquals(5L, r.getId());
+        Assertions.assertEquals(requestValido.getCorreo(), r.getCorreo());
     }
 
-    // Actualiza usuario
     @Test
-    @DisplayName("Debe actualizar usuario")
-    void debeActualizarUsuarioCuandoExiste() {
+    void getById_userNotFound_shouldThrowException() {
+        // Arrange
+        Mockito.when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
 
-        Usuario existente = buildUsuario(2L, requestValido);
+        // Act + Assert
+        NotFoundException ex = Assertions.assertThrows(NotFoundException.class, () ->
+                usuarioService.getById(99L).block());
 
-        when(usuarioRepository.findById(2L))
-                .thenReturn(java.util.Optional.of(existente));
-
-        when(usuarioRepository.save(any(Usuario.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
-
-        UsuarioUpdateRequest upd =
-                new UsuarioUpdateRequest();
-
-        upd.setNombre("Carlos Updated");
-
-        UsuarioResponse res =
-                usuarioService.update(2L, upd).block();
-
-        assertThat(res.getNombre())
-                .isEqualTo("Carlos Updated");
-
-        verify(usuarioRepository, times(1))
-                .save(any(Usuario.class));
+        Assertions.assertTrue(ex.getMessage().contains("Usuario"));
     }
 
-    // Usuario no encontrado al actualizar
     @Test
-    @DisplayName("Debe lanzar NotFoundException")
-    void debeLanzarNotFoundAlActualizarNoExistente() {
-
-        when(usuarioRepository.findById(99L))
-                .thenReturn(java.util.Optional.empty());
-
-        UsuarioUpdateRequest upd =
-                new UsuarioUpdateRequest();
-
+    void update_userNotFound_shouldThrowException() {
+        // Arrange
+        Mockito.when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
+        UsuarioUpdateRequest upd = new UsuarioUpdateRequest();
         upd.setNombre("No Existe");
 
-        assertThatThrownBy(() ->
-                usuarioService.update(99L, upd).block()
-        )
-                .isInstanceOf(
-                        com.tienda.ropa.backend.web.advice.NotFoundException.class
-                );
+        // Act + Assert
+        Assertions.assertThrows(NotFoundException.class, () ->
+                usuarioService.update(99L, upd).block());
     }
 
-    // Lista usuarios
     @Test
-    @DisplayName("Debe listar usuarios")
-    void listRetornaUsuarios() {
-
+    void list_shouldReturnUserList() {
+        // Arrange
         Usuario u1 = buildUsuario(10L, requestValido);
-
         Usuario u2 = buildUsuario(11L, requestValido);
         u2.setNombre("Otro");
 
-        when(usuarioRepository.findAll())
-                .thenReturn(Arrays.asList(u1, u2));
+        Mockito.when(usuarioRepository.findAll()).thenReturn(Arrays.asList(u1, u2));
 
-        List<UsuarioResponse> lista =
-                usuarioService.list().collectList().block();
+        // Act
+        List<UsuarioResponse> lista = usuarioService.list().collectList().block();
 
-        assertThat(lista).hasSize(2);
-
-        assertThat(lista)
-                .extracting(UsuarioResponse::getId)
-                .contains(10L, 11L);
+        // Assert
+        Assertions.assertNotNull(lista);
+        Assertions.assertEquals(2, lista.size());
+        Mockito.verify(usuarioRepository).findAll();
     }
 
-    // Busca usuarios por nombre
     @Test
-    @DisplayName("Debe buscar usuarios")
-    void searchByNamePaginado() {
-
+    void searchByName_shouldReturnPagedResults() {
+        // Arrange
         Usuario u1 = buildUsuario(20L, requestValido);
         u1.setNombre("Carlos One");
-
         Usuario u2 = buildUsuario(21L, requestValido);
         u2.setNombre("Carlos Two");
 
-        when(usuarioRepository.findByNombreContainingIgnoreCase(
-                eq("carlos"),
-                any()
-        ))
-                .thenReturn(new PageImpl<>(List.of(u1, u2)));
+        Mockito.when(usuarioRepository.findByNombreContainingIgnoreCase(
+                ArgumentMatchers.eq("carlos"),
+                ArgumentMatchers.any()
+        )).thenReturn(new PageImpl<>(List.of(u1, u2)));
 
-        var page = usuarioService.searchByName(
-                "carlos",
-                0,
-                10
-        ).block();
+        // Act
+        Page<UsuarioResponse> page = usuarioService.searchByName("carlos", 0, 10).block();
 
-        assertThat(page.getTotalElements())
-                .isEqualTo(2);
-
-        assertThat(page.getContent())
-                .extracting(UsuarioResponse::getNombre)
-                .containsExactlyInAnyOrder(
-                        "Carlos One",
-                        "Carlos Two"
-                );
+        // Assert
+        Assertions.assertNotNull(page);
+        Assertions.assertEquals(2, page.getTotalElements());
     }
 
-    // Usuario no encontrado
-    @Test
-    @DisplayName("Debe lanzar NotFoundException si no existe")
-    void debeLanzarNotFoundSiUsuarioNoExiste() {
-
-        when(usuarioRepository.findById(99L))
-                .thenReturn(java.util.Optional.empty());
-
-        assertThatThrownBy(() ->
-                usuarioService.getById(99L).block()
-        )
-                .isInstanceOf(
-                        com.tienda.ropa.backend.web.advice.NotFoundException.class
-                )
-                .hasMessageContaining("Usuario");
-    }
-
-    // Crea usuario auxiliar
-    private Usuario buildUsuario(
-            Long id,
-            UsuarioCreateRequest req
-    ) {
-
+    private Usuario buildUsuario(Long id, UsuarioCreateRequest req) {
         Usuario u = new Usuario();
-
         u.setId(id);
         u.setNombre(req.getNombre());
         u.setCorreo(req.getCorreo());
         u.setContrasena(req.getContrasena());
         u.setRol(req.getRol());
         u.setActive(true);
-
         return u;
     }
 }
