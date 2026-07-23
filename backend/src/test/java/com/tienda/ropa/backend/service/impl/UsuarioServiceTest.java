@@ -62,7 +62,7 @@ class UsuarioServiceTest {
                 .thenReturn(usuarioGuardado);
 
         UsuarioResponse response =
-                usuarioService.create(requestValido);
+                usuarioService.create(requestValido).block();
 
         assertThat(response).isNotNull();
 
@@ -90,7 +90,7 @@ class UsuarioServiceTest {
                 .thenReturn(true);
 
         assertThatThrownBy(() ->
-                usuarioService.create(requestValido)
+                usuarioService.create(requestValido).block()
         )
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("correo");
@@ -113,7 +113,7 @@ class UsuarioServiceTest {
                 .thenAnswer(inv -> inv.getArgument(0));
 
         UsuarioResponse response =
-                usuarioService.deactivate(1L);
+                usuarioService.deactivate(1L).block();
 
         assertThat(response.getActive()).isFalse();
 
@@ -132,7 +132,7 @@ class UsuarioServiceTest {
                 .thenReturn(java.util.Optional.of(usuario));
 
         UsuarioResponse r =
-                usuarioService.getById(5L);
+                usuarioService.getById(5L).block();
 
         assertThat(r).isNotNull();
 
@@ -161,7 +161,7 @@ class UsuarioServiceTest {
         upd.setNombre("Carlos Updated");
 
         UsuarioResponse res =
-                usuarioService.update(2L, upd);
+                usuarioService.update(2L, upd).block();
 
         assertThat(res.getNombre())
                 .isEqualTo("Carlos Updated");
@@ -184,7 +184,7 @@ class UsuarioServiceTest {
         upd.setNombre("No Existe");
 
         assertThatThrownBy(() ->
-                usuarioService.update(99L, upd)
+                usuarioService.update(99L, upd).block()
         )
                 .isInstanceOf(
                         com.tienda.ropa.backend.web.advice.NotFoundException.class
@@ -205,7 +205,7 @@ class UsuarioServiceTest {
                 .thenReturn(Arrays.asList(u1, u2));
 
         List<UsuarioResponse> lista =
-                usuarioService.list();
+                usuarioService.list().collectList().block();
 
         assertThat(lista).hasSize(2);
 
@@ -235,7 +235,7 @@ class UsuarioServiceTest {
                 "carlos",
                 0,
                 10
-        );
+        ).block();
 
         assertThat(page.getTotalElements())
                 .isEqualTo(2);
@@ -257,7 +257,7 @@ class UsuarioServiceTest {
                 .thenReturn(java.util.Optional.empty());
 
         assertThatThrownBy(() ->
-                usuarioService.getById(99L)
+                usuarioService.getById(99L).block()
         )
                 .isInstanceOf(
                         com.tienda.ropa.backend.web.advice.NotFoundException.class

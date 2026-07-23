@@ -44,10 +44,21 @@ public class PedidoReactiveController {
         return pedidoReactiveService.streamProcessing();
     }
 
-    @PostMapping("/procesar-lotes")
-    public ResponseEntity<String> procesarPedidosPorLotes() {
-        pedidoReactiveService.procesarPedidosPorLotes();
+    @GetMapping(value = "/stream/lotes", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<PedidoResponse> streamPedidosLotes(
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "3") int batchSize,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "500") long delayMs
+    ) {
+        return pedidoReactiveService.streamPedidosConBackpressure(batchSize, delayMs);
+    }
 
-        return ResponseEntity.accepted().body("Procesamiento por lotes iniciado.");
+    @PostMapping("/procesar-lotes")
+    public ResponseEntity<String> procesarPedidosPorLotes(
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "2") int batchSize,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "400") long delayMs
+    ) {
+        pedidoReactiveService.procesarPedidosPorLotesConDemanda(batchSize, delayMs);
+        return ResponseEntity.accepted().body("Procesamiento por lotes iniciado con batchSize=" + batchSize);
     }
 }
+

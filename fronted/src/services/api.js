@@ -78,7 +78,7 @@ export const api = {
         create: (data) => post('/pedidos', data),
         updateEstado: (id, estado) => patch(`/pedidos/${id}/estado`, { estado }),
         getPromedio: () => get('/reactivo/pedidos/promedio'),
-        procesarLotes: () => post('/reactivo/pedidos/procesar-lotes', {}),
+        procesarLotes: (batchSize = 2, delayMs = 400) => post(`/reactivo/pedidos/procesar-lotes?batchSize=${batchSize}&delayMs=${delayMs}`, {}),
     },
 };
 

@@ -7,63 +7,48 @@ import com.tienda.ropa.backend.service.PedidoService;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
 import java.util.Map;
 
-// Controlador de pedidos
+// Controlador reactivo de pedidos
 @RestController
 @RequestMapping("/api/pedidos")
 public class PedidoController {
 
     private final PedidoService service;
 
-    // Inyección del servicio
     public PedidoController(PedidoService service) {
         this.service = service;
     }
 
-    // Crea pedido
     @PostMapping
-    public ResponseEntity<PedidoResponse> create(
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<PedidoResponse> create(
             @Valid @RequestBody PedidoCreateRequest request
     ) {
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(service.create(request));
+        return service.create(request);
     }
 
-    // Obtiene pedido por id
     @GetMapping("/{id}")
-    public ResponseEntity<PedidoResponse> getById(
-            @PathVariable Long id
-    ) {
-
-        return ResponseEntity.ok(service.getById(id));
+    public Mono<PedidoResponse> getById(@PathVariable Long id) {
+        return service.getById(id);
     }
 
-    // Lista pedidos
     @GetMapping
-    public ResponseEntity<List<PedidoResponse>> getAll() {
-
-        return ResponseEntity.ok(service.list());
+    public Flux<PedidoResponse> getAll() {
+        return service.list();
     }
 
-    // Actualiza estado del pedido
     @PatchMapping("/{id}/estado")
-    public ResponseEntity<PedidoResponse> updateEstado(
+    public Mono<PedidoResponse> updateEstado(
             @PathVariable Long id,
             @RequestBody Map<String, String> body
     ) {
-
         String nuevoEstado = body.get("estado");
-
-        return ResponseEntity.ok(
-            service.updateEstado(id, nuevoEstado)
-
-        );
+        return service.updateEstado(id, nuevoEstado);
     }
 }
+
