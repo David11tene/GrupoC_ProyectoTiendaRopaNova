@@ -1,5 +1,7 @@
 package com.tienda.ropa.backend.service.reactive;
 
+import com.tienda.ropa.backend.domain.Pedido;
+import com.tienda.ropa.backend.dto.detallepedido.DetallePedidoResponse;
 import com.tienda.ropa.backend.dto.pedido.PedidoResponse;
 import com.tienda.ropa.backend.repository.PedidoRepository;
 import org.springframework.stereotype.Service;
@@ -9,6 +11,8 @@ import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PedidoReactiveService {
@@ -50,31 +54,17 @@ public class PedidoReactiveService {
     }
 
     public void procesarPedidosPorLotes() {
+        procesarPedidosPorLotesConDemanda(2, 400);
+    }
+
+    public void procesarPedidosPorLotesConDemanda(int batchSize, long delayMs) {
+        reportProcessing("[Backpressure] Configurando suscripción con demanda de batchSize=" + batchSize);
+
         Flux<PedidoResponse> flujoPedidos = Flux.fromIterable(pedidoRepository.findAll())
-                .delayElements(Duration.ofMillis(400))
-                .filter(pedido -> pedido.getTotal() >= 50.00)
-                .map(pedido -> {
-                    PedidoResponse response = new PedidoResponse();
-                    response.setId(pedido.getId());
-                    response.setUsuario(pedido.getUsuario().getNombre());
-                    response.setFecha(pedido.getFecha());
-                    response.setEstado(pedido.getEstado());
-                    response.setTotal(pedido.getTotal());
-                    return response;
-                })
-                .map(response -> {
-                    if (response.getTotal() > 100.00) {
-                        throw new RuntimeException(
-                                "Pedido sospechoso, total mayor a $100: $" + response.getTotal()
-                        );
-                    }
-                    return response;
-                })
-                .map(response -> {
-                    double totalConIva = response.getTotal() * (1 + IVA);
-                    response.setTotal(Math.round(totalConIva * 100.0) / 100.0);
-                    return response;
-                })
+                .delayElements(Duration.ofMillis(Math.max(100, delayMs)))
+                .limitRate(Math.max(1, batchSize))
+                .filter(pedido -> pedido.getTotal() != null && pedido.getTotal() >= 10.00)
+                .map(this::toResponse)
                 .doOnError(error ->
                         reportProcessing("[Pedidos] Error detectado: " + error.getMessage())
                 )
@@ -93,8 +83,49 @@ public class PedidoReactiveService {
         flujoPedidos.subscribe(new PedidoBackpressureSubscriber(this::publishProcessing));
     }
 
+    public Flux<PedidoResponse> streamPedidosConBackpressure(int batchSize, long delayMs) {
+        reportProcessing("[Backpressure] Iniciando SSE streaming con demanda client-side: batchSize = " + batchSize + ", delay = " + delayMs + "ms");
+
+        return Mono.fromCallable(pedidoRepository::findAll)
+                .flatMapMany(Flux::fromIterable)
+                .map(this::toResponse)
+                .delayElements(Duration.ofMillis(Math.max(100, delayMs)))
+                .limitRate(Math.max(1, batchSize))
+                .doOnNext(p -> reportProcessing("[Backpressure SSE] Emitiendo pedido #" + p.getId() + " (Demand rate = " + batchSize + ")"))
+                .doOnComplete(() -> reportProcessing("[Backpressure SSE] Transmisión completada."))
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    private PedidoResponse toResponse(Pedido p) {
+        PedidoResponse r = new PedidoResponse();
+        r.setId(p.getId());
+        r.setUsuario(p.getUsuario() != null ? p.getUsuario().getNombre() : "Desconocido");
+        r.setFecha(p.getFecha());
+        r.setTotal(p.getTotal() != null ? p.getTotal() : 0.0);
+        r.setEstado(p.getEstado());
+
+        if (p.getDetalles() != null) {
+            List<DetallePedidoResponse> detallesResp = p.getDetalles().stream().map(d -> {
+                DetallePedidoResponse dr = new DetallePedidoResponse();
+                dr.setId(d.getId());
+                dr.setProducto(d.getProducto() != null ? d.getProducto().getNombre() : "Producto sin nombre");
+                dr.setCantidad(d.getCantidad());
+                dr.setSubtotal(d.getSubtotal());
+                if (d.getProducto() != null && d.getProducto().getPrecio() != null) {
+                    dr.setPrecioUnitario(d.getProducto().getPrecio());
+                } else if (d.getCantidad() != null && d.getCantidad() > 0 && d.getSubtotal() != null) {
+                    dr.setPrecioUnitario(d.getSubtotal() / d.getCantidad());
+                }
+                return dr;
+            }).collect(Collectors.toList());
+            r.setDetalles(detallesResp);
+        }
+        return r;
+    }
+
     private void reportProcessing(String message) {
         System.out.println(message);
         publishProcessing(message);
     }
 }
+

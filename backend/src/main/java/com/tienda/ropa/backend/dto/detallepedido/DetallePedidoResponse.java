@@ -6,6 +6,8 @@ public class DetallePedidoResponse {
     private String producto;
     private Integer cantidad;
     private Double subtotal;
+    private Double precioUnitario;
+    private Integer stockDisponible;
 
     // GETTERS Y SETTERS
 
@@ -39,5 +41,21 @@ public class DetallePedidoResponse {
 
     public void setSubtotal(Double subtotal) {
         this.subtotal = subtotal;
+    }
+
+    public Double getPrecioUnitario() {
+        return precioUnitario;
+    }
+
+    public void setPrecioUnitario(Double precioUnitario) {
+        this.precioUnitario = precioUnitario;
+    }
+
+    public Integer getStockDisponible() {
+        return stockDisponible;
+    }
+
+    public void setStockDisponible(Integer stockDisponible) {
+        this.stockDisponible = stockDisponible;
     }
 }

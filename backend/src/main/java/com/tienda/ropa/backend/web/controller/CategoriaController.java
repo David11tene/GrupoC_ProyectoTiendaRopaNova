@@ -6,70 +6,50 @@ import com.tienda.ropa.backend.service.CategoriaService;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
-
-// Controlador de categorías
+// Controlador reactivo de categorías
 @RestController
 @RequestMapping("/api/categorias")
 public class CategoriaController {
 
     private final CategoriaService service;
 
-    // Inyección del servicio
     public CategoriaController(CategoriaService service) {
         this.service = service;
     }
 
-    // Crea categoría
     @PostMapping
-    public ResponseEntity<CategoriaResponse> create(
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<CategoriaResponse> create(
             @Valid @RequestBody CategoriaCreateRequest request
     ) {
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(service.create(request));
+        return service.create(request);
     }
 
-    // Obtiene categoría por id
     @GetMapping("/{id}")
-    public ResponseEntity<CategoriaResponse> getById(
-            @PathVariable Long id
-    ) {
-
-        return ResponseEntity.ok(service.getById(id));
+    public Mono<CategoriaResponse> getById(@PathVariable Long id) {
+        return service.getById(id);
     }
 
-    // Lista categorías
     @GetMapping
-    public ResponseEntity<List<CategoriaResponse>> getAll() {
-
-        return ResponseEntity.ok(service.list());
+    public Flux<CategoriaResponse> getAll() {
+        return service.list();
     }
 
-    // Actualiza categoría
     @PutMapping("/{id}")
-    public ResponseEntity<CategoriaResponse> update(
+    public Mono<CategoriaResponse> update(
             @PathVariable Long id,
             @Valid @RequestBody CategoriaUpdateRequest request
     ) {
-
-        return ResponseEntity.ok(
-                service.update(id, request)
-        );
+        return service.update(id, request);
     }
 
-    // Elimina categoría
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(
-            @PathVariable Long id
-    ) {
-
-        service.delete(id);
-
-        return ResponseEntity.noContent().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Mono<Void> delete(@PathVariable Long id) {
+        return service.delete(id);
     }
-}
+}
