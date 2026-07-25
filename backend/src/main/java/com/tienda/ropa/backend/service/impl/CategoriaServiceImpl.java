@@ -8,8 +8,9 @@ import com.tienda.ropa.backend.web.advice.ConflictException;
 import com.tienda.ropa.backend.web.advice.NotFoundException;
 
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Service
 public class CategoriaServiceImpl implements CategoriaService {
@@ -21,67 +22,62 @@ public class CategoriaServiceImpl implements CategoriaService {
     }
 
     @Override
-    public CategoriaResponse create(CategoriaCreateRequest request) {
-
-        if(repo.existsByNombre(request.getNombre())) {
-            throw new ConflictException("La categoría ya existe");
-        }
-
-        Categoria c = new Categoria();
-        c.setNombre(request.getNombre());
-
-        return toResponse(repo.save(c));
-    }
-
-    @Override
-    public CategoriaResponse getById(Long id) {
-
-        Categoria c = repo.findById(id)
-                .orElseThrow(() ->
-                        new NotFoundException("Categoría no encontrada"));
-
-        return toResponse(c);
-    }
-
-    @Override
-    public List<CategoriaResponse> list() {
-        return repo.findAll()
-                .stream()
-                .map(this::toResponse)
-                .toList();
-    }
-
-    @Override
-    public CategoriaResponse update(Long id,
-                                    CategoriaUpdateRequest request) {
-
-        Categoria c = repo.findById(id)
-                .orElseThrow(() ->
-                        new NotFoundException("Categoría no encontrada"));
-
-        if(request.getNombre() != null)
+    public Mono<CategoriaResponse> create(CategoriaCreateRequest request) {
+        return Mono.fromCallable(() -> {
+            if (repo.existsByNombre(request.getNombre())) {
+                throw new ConflictException("La categoría ya existe");
+            }
+            Categoria c = new Categoria();
             c.setNombre(request.getNombre());
-
-        return toResponse(repo.save(c));
+            return toResponse(repo.save(c));
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
     @Override
-    public void delete(Long id) {
+    public Mono<CategoriaResponse> getById(Long id) {
+        return Mono.fromCallable(() -> {
+            Categoria c = repo.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Categoría no encontrada"));
+            return toResponse(c);
+        }).subscribeOn(Schedulers.boundedElastic());
+    }
 
-        Categoria c = repo.findById(id)
-                .orElseThrow(() ->
-                        new NotFoundException("Categoría no encontrada"));
+    @Override
+    public Flux<CategoriaResponse> list() {
+        return Mono.fromCallable(repo::findAll)
+                .flatMapMany(Flux::fromIterable)
+                .map(this::toResponse)
+                .subscribeOn(Schedulers.boundedElastic());
+    }
 
-        repo.delete(c);
+    @Override
+    public Mono<CategoriaResponse> update(Long id, CategoriaUpdateRequest request) {
+        return Mono.fromCallable(() -> {
+            Categoria c = repo.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Categoría no encontrada"));
+
+            if (request.getNombre() != null) {
+                c.setNombre(request.getNombre());
+            }
+
+            return toResponse(repo.save(c));
+        }).subscribeOn(Schedulers.boundedElastic());
+    }
+
+    @Override
+    public Mono<Void> delete(Long id) {
+        return Mono.<Void>fromRunnable(() -> {
+            Categoria c = repo.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Categoría no encontrada"));
+            repo.delete(c);
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
     private CategoriaResponse toResponse(Categoria c) {
-
         CategoriaResponse r = new CategoriaResponse();
-
         r.setId(c.getId());
         r.setNombre(c.getNombre());
-
         return r;
     }
 }
+

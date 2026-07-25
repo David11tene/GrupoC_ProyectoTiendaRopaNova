@@ -1,6 +1,8 @@
 package com.tienda.ropa.backend.dto.pedido;
 
+import com.tienda.ropa.backend.dto.detallepedido.DetallePedidoResponse;
 import java.time.LocalDate;
+import java.util.List;
 
 public class PedidoResponse {
 
@@ -9,6 +11,7 @@ public class PedidoResponse {
     private LocalDate fecha;
     private Double total;
     private String estado;
+    private List<DetallePedidoResponse> detalles;
 
     // GETTERS Y SETTERS
 
@@ -50,5 +53,13 @@ public class PedidoResponse {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public List<DetallePedidoResponse> getDetalles() {
+        return detalles;
+    }
+
+    public void setDetalles(List<DetallePedidoResponse> detalles) {
+        this.detalles = detalles;
     }
 }

@@ -8,82 +8,62 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
-
-// Controlador de productos
+// Controlador reactivo de productos
 @RestController
 @RequestMapping("/api/productos")
 public class ProductoController {
 
     private final ProductoService service;
 
-    // Inyección del servicio
     public ProductoController(ProductoService service) {
         this.service = service;
     }
 
-    // Crea producto
     @PostMapping
-    public ResponseEntity<ProductoResponse> create(
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<ProductoResponse> create(
             @Valid @RequestBody ProductoCreateRequest request
     ) {
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(service.create(request));
+        return service.create(request);
     }
 
-    // Obtiene producto por id
     @GetMapping("/{id}")
-    public ResponseEntity<ProductoResponse> getById(
+    public Mono<ProductoResponse> getById(
             @PathVariable Long id
     ) {
-
-        return ResponseEntity.ok(service.getById(id));
+        return service.getById(id);
     }
 
-    // Lista productos
     @GetMapping
-    public ResponseEntity<List<ProductoResponse>> getAll() {
-
-        return ResponseEntity.ok(service.list());
+    public Flux<ProductoResponse> getAll() {
+        return service.list();
     }
 
-    // Desactiva producto
     @PatchMapping("/{id}/deactivate")
-    public ResponseEntity<ProductoResponse> deactivate(
+    public Mono<ProductoResponse> deactivate(
             @PathVariable Long id
     ) {
-
-        return ResponseEntity.ok(service.deactivate(id));
+        return service.deactivate(id);
     }
 
-    // Busca productos por nombre
     @GetMapping("/search")
-    public ResponseEntity<Page<ProductoResponse>> search(
+    public Mono<Page<ProductoResponse>> search(
             @RequestParam String name,
             @RequestParam int page,
             @RequestParam int size
     ) {
-
-        return ResponseEntity.ok(
-                service.searchByName(name, page, size)
-        );
+        return service.searchByName(name, page, size);
     }
 
-    // Actualiza producto
     @PutMapping("/{id}")
-    public ResponseEntity<ProductoResponse> update(
+    public Mono<ProductoResponse> update(
             @PathVariable Long id,
             @Valid @RequestBody ProductoUpdateRequest request
     ) {
-
-        return ResponseEntity.ok(
-                service.update(id, request)
-        );
+        return service.update(id, request);
     }
-}
+}

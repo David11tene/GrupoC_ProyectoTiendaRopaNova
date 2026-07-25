@@ -21,3 +21,7 @@ Thumbs.db
 # Ignorar archivos estáticos que se generan al compilar el frontend dentro del backend
 backend/src/main/resources/static/index.html
 backend/src/main/resources/static/assets/
+
+#proyectos
+Lab6_CI/
+PruebasUnitarias/
