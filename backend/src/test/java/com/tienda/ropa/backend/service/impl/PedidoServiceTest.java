@@ -100,7 +100,7 @@ public class PedidoServiceTest {
         });
 
         // Act
-        PedidoResponse response = pedidoService.create(requestValido);
+        PedidoResponse response = pedidoService.create(requestValido).block();
 
         // Assert
         assertNotNull(response);
@@ -124,7 +124,7 @@ public class PedidoServiceTest {
 
         // Act & Assert
         NotFoundException ex = assertThrows(NotFoundException.class, () ->
-                pedidoService.create(requestValido));
+                pedidoService.create(requestValido).block());
         assertEquals("Usuario no encontrado con id: 99", ex.getMessage());
         verify(pedidoRepository, never()).save(any());
     }
@@ -139,7 +139,7 @@ public class PedidoServiceTest {
 
         // Act & Assert
         ConflictException ex = assertThrows(ConflictException.class, () ->
-                pedidoService.create(requestValido));
+                pedidoService.create(requestValido).block());
         assertEquals("El usuario está desactivado y no puede hacer pedidos.", ex.getMessage());
         verifyNoInteractions(productoRepository, pedidoReactiveService);
         verify(pedidoRepository, never()).save(any());
@@ -156,7 +156,7 @@ public class PedidoServiceTest {
 
         // Act & Assert
         ConflictException ex = assertThrows(ConflictException.class, () ->
-                pedidoService.create(requestValido));
+                pedidoService.create(requestValido).block());
         assertTrue(ex.getMessage().contains("no está disponible"));
         verify(pedidoRepository, never()).save(any());
         verifyNoInteractions(pedidoReactiveService);
@@ -173,7 +173,7 @@ public class PedidoServiceTest {
 
         // Act & Assert
         ConflictException ex = assertThrows(ConflictException.class, () ->
-                pedidoService.create(requestValido));
+                pedidoService.create(requestValido).block());
         assertTrue(ex.getMessage().contains("Stock insuficiente"));
         verify(pedidoRepository, never()).save(any());
         verifyNoInteractions(pedidoReactiveService);
@@ -191,7 +191,7 @@ public class PedidoServiceTest {
         ArgumentCaptor<Pedido> captor = ArgumentCaptor.forClass(Pedido.class);
 
         // Act
-        pedidoService.create(requestValido);
+        pedidoService.create(requestValido).block();
 
         // Assert
         verify(pedidoRepository).save(captor.capture());
@@ -213,7 +213,7 @@ public class PedidoServiceTest {
         when(pedidoRepository.save(any(Pedido.class))).thenAnswer(inv -> inv.getArgument(0));
 
         // Act
-        pedidoService.create(requestValido);
+        pedidoService.create(requestValido).block();
 
         // Assert
         InOrder inOrder = Mockito.inOrder(usuarioRepository, productoRepository, pedidoRepository, pedidoReactiveService);
