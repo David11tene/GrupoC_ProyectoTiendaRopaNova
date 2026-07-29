@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="UsuarioServiceImpl - Pruebas Unitarias (AAA + Mockito)" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-07-29T17:21:16" hostname="DESKTOP-DJQ7F5D" time="0.101">
+  <properties/>
+  <testcase name="create_validData_shouldSaveAndReturnResponse()" classname="com.tienda.ropa.backend.service.impl.UsuarioServiceTest" time="0.047"/>
+  <testcase name="create_emailAlreadyExists_shouldThrowException_andNotSave()" classname="com.tienda.ropa.backend.service.impl.UsuarioServiceTest" time="0.005"/>
+  <testcase name="crearUsuario_datosValidos_guardaUsuario_ArgumentCaptor" classname="com.tienda.ropa.backend.service.impl.UsuarioServiceTest" time="0.004"/>
+  <testcase name="update_userNotFound_shouldThrowException()" classname="com.tienda.ropa.backend.service.impl.UsuarioServiceTest" time="0.006"/>
+  <testcase name="crearUsuario_datosValidos_verificaOrdenEjecucion" classname="com.tienda.ropa.backend.service.impl.UsuarioServiceTest" time="0.004"/>
+  <testcase name="deactivate_validId_shouldDeactivateUser()" classname="com.tienda.ropa.backend.service.impl.UsuarioServiceTest" time="0.004"/>
+  <testcase name="searchByName_shouldReturnPagedResults()" classname="com.tienda.ropa.backend.service.impl.UsuarioServiceTest" time="0.006"/>
+  <testcase name="getById_userNotFound_shouldThrowException()" classname="com.tienda.ropa.backend.service.impl.UsuarioServiceTest" time="0.006"/>
+  <testcase name="update_duplicateEmail_shouldThrowException()" classname="com.tienda.ropa.backend.service.impl.UsuarioServiceTest" time="0.003"/>
+  <testcase name="getById_userFound_shouldReturnUserResponse()" classname="com.tienda.ropa.backend.service.impl.UsuarioServiceTest" time="0.002"/>
+  <testcase name="update_validEmail_shouldUpdateAndReturnResponse()" classname="com.tienda.ropa.backend.service.impl.UsuarioServiceTest" time="0.003"/>
+  <testcase name="list_shouldReturnUserList()" classname="com.tienda.ropa.backend.service.impl.UsuarioServiceTest" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

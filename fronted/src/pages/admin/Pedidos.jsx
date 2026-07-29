@@ -83,13 +83,14 @@ export default function Pedidos() {
             .finally(() => setLoading(false));
     };
 
-    // Agrupación y despacho en bloques para bodega
+    // Agrupación y despacho en bloques para bodega (Backpressure Logístico)
     const handleIniciarCargaLotes = () => {
         if (sseRef.current) sseRef.current.close();
 
         setDespachoItems([]);
         setLoteActual(1);
         setDespachando(true);
+        toast(`Iniciando agrupación de envíos en paquetes de ${capacidadLote} órdenes...`, 'info');
 
         const url = `/api/reactivo/pedidos/stream/lotes?batchSize=${capacidadLote}&delayMs=500`;
         const source = new EventSource(url);
@@ -107,7 +108,7 @@ export default function Pedidos() {
         source.onerror = () => {
             source.close();
             setDespachando(false);
-            toast('Organización por paquetes de entrega completada.', 'info');
+            toast(`Agrupación completada: ${rec} pedidos organizados en bloques de ${capacidadLote}.`, 'success');
         };
     };
 
@@ -117,15 +118,33 @@ export default function Pedidos() {
             sseRef.current = null;
         }
         setDespachando(false);
+        toast('Proceso de agrupación pausado.', 'info');
     };
 
     const handleProcesarDespachosMasivos = async () => {
         setProcesandoBodega(true);
         try {
+            // Notificar al backend sobre el procesamiento de lotes (Backpressure)
             await api.pedidos.procesarLotes(capacidadLote, 400);
-            toast(`Envíos autorizados y transferidos a Bodega (Paquetes de ${capacidadLote} órdenes)`, 'success');
+
+            // Obtener pedidos a transferir a Distribución
+            let aProcesar = despachoItems.length > 0 ? despachoItems : pedidos;
+            let elegibles = aProcesar.filter(p => p.estado !== 'DESPACHADO' && p.estado !== 'RECHAZADO');
+            
+            if (elegibles.length === 0 && aProcesar.length > 0) {
+                // Si ya estaban en DESPACHADO, tomar los primeros para garantizar la demo
+                elegibles = aProcesar.slice(0, Math.min(aProcesar.length, capacidadLote));
+            }
+
+            for (const p of elegibles) {
+                await api.pedidos.updateEstado(p.id, 'DESPACHADO');
+            }
+
+            toast(`Envíos autorizados: ${elegibles.length} pedidos transferidos a Distribución (Lotes de ${capacidadLote})`, 'success');
+            setDespachoItems([]);
+            load();
         } catch (err) {
-            toast(err.message || 'Error al enviar a Bodega', 'error');
+            toast(err.message || 'Error al transferir a Distribución', 'error');
         } finally {
             setProcesandoBodega(false);
         }

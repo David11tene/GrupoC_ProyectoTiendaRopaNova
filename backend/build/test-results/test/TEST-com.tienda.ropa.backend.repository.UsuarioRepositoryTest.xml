@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="UsuarioRepository - Tests JPA" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-07-29T17:21:15" hostname="DESKTOP-DJQ7F5D" time="0.169">
+  <properties/>
+  <testcase name="Configuración H2 correcta" classname="com.tienda.ropa.backend.repository.UsuarioRepositoryTest" time="0.016"/>
+  <testcase name="Debe guardar y recuperar usuario" classname="com.tienda.ropa.backend.repository.UsuarioRepositoryTest" time="0.008"/>
+  <testcase name="Debe retornar vacío sin coincidencias" classname="com.tienda.ropa.backend.repository.UsuarioRepositoryTest" time="0.015"/>
+  <testcase name="Debe buscar usuario por correo" classname="com.tienda.ropa.backend.repository.UsuarioRepositoryTest" time="0.009"/>
+  <testcase name="Debe eliminar usuario por id" classname="com.tienda.ropa.backend.repository.UsuarioRepositoryTest" time="0.012"/>
+  <testcase name="Debe buscar usuario por nombre exacto" classname="com.tienda.ropa.backend.repository.UsuarioRepositoryTest" time="0.013"/>
+  <testcase name="Debe manejar paginación" classname="com.tienda.ropa.backend.repository.UsuarioRepositoryTest" time="0.034"/>
+  <testcase name="No debe permitir correos duplicados" classname="com.tienda.ropa.backend.repository.UsuarioRepositoryTest" time="0.031"/>
+  <testcase name="Debe validar existencia de correo" classname="com.tienda.ropa.backend.repository.UsuarioRepositoryTest" time="0.01"/>
+  <testcase name="Debe buscar usuarios por nombre" classname="com.tienda.ropa.backend.repository.UsuarioRepositoryTest" time="0.009"/>
+  <system-out><![CDATA[2026-07-29T12:21:15.234-05:00  INFO 25260 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.tienda.ropa.backend.repository.UsuarioRepositoryTest]: UsuarioRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-07-29T12:21:15.250-05:00  INFO 25260 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.tienda.ropa.backend.BackendApplication for test class com.tienda.ropa.backend.repository.UsuarioRepositoryTest
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\' offset ? rows fetch first ? rows only
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0 where u1_0.correo=?
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0 where u1_0.nombre=?
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\' offset ? rows fetch first ? rows only
+Hibernate: select count(u1_0.id_usuario) from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\'
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\' offset ? rows fetch first ? rows only
+Hibernate: select count(u1_0.id_usuario) from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\'
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\' offset ? rows fetch first ? rows only
+Hibernate: select count(u1_0.id_usuario) from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\'
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\' offset ? rows fetch first ? rows only
+Hibernate: select count(u1_0.id_usuario) from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\'
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+2026-07-29T12:21:15.395-05:00  WARN 25260 --- [    Test worker] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Error: 23505, SQLState: 23505
+2026-07-29T12:21:15.396-05:00 ERROR 25260 --- [    Test worker] o.h.engine.jdbc.spi.SqlExceptionHelper   : Violación de indice de Unicidad ó Clave primaria: "PUBLIC.CONSTRAINT_INDEX_3 ON PUBLIC.USUARIOS(CORREO NULLS FIRST) VALUES ( /* 12 */ 'dup@example.com' )"
+Unique index or primary key violation: "PUBLIC.CONSTRAINT_INDEX_3 ON PUBLIC.USUARIOS(CORREO NULLS FIRST) VALUES ( /* 12 */ 'dup@example.com' )"; SQL statement:
+insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default) [23505-224]
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: select u1_0.id_usuario from usuarios u1_0 where u1_0.correo=? fetch first ? rows only
+Hibernate: select u1_0.id_usuario from usuarios u1_0 where u1_0.correo=? fetch first ? rows only
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\' offset ? rows fetch first ? rows only
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
