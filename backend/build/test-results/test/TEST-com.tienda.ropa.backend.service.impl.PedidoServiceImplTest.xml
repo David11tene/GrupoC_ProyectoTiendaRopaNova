@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.tienda.ropa.backend.service.impl.PedidoServiceImplTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-07-29T07:16:52" hostname="DESKTOP-J0CAMIC" time="0.205">
+  <properties/>
+  <testcase name="Debe reinstalar / reincorporar el stock cuando el pedido es RECHAZADO" classname="com.tienda.ropa.backend.service.impl.PedidoServiceImplTest" time="0.188"/>
+  <testcase name="Debe lanzar ConflictException si el stock es insuficiente" classname="com.tienda.ropa.backend.service.impl.PedidoServiceImplTest" time="0.005"/>
+  <testcase name="Debe lanzar NotFoundException si el usuario no existe" classname="com.tienda.ropa.backend.service.impl.PedidoServiceImplTest" time="0.002"/>
+  <testcase name="Debe crear un pedido correctamente y descontar el stock" classname="com.tienda.ropa.backend.service.impl.PedidoServiceImplTest" time="0.002"/>
+  <testcase name="Debe lanzar ConflictException si se ingresa un estado inválido" classname="com.tienda.ropa.backend.service.impl.PedidoServiceImplTest" time="0.002"/>
+  <testcase name="Debe actualizar el estado a APROBADO correctamente" classname="com.tienda.ropa.backend.service.impl.PedidoServiceImplTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

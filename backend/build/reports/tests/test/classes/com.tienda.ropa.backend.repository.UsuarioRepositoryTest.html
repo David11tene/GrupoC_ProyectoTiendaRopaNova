@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - UsuarioRepository - Tests JPA</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>UsuarioRepository - Tests JPA</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/com.tienda.ropa.backend.repository.html">com.tienda.ropa.backend.repository</a> &gt; UsuarioRepositoryTest</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">10</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">0.076s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success" id="successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div id="tabs">
+<ul class="tabLinks">
+<li>
+<a href="#tab0">Tests</a>
+</li>
+<li>
+<a href="#tab1">Standard output</a>
+</li>
+</ul>
+<div id="tab0" class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Method name</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="success">Debe retornar vacío sin coincidencias</td>
+<td class="success">buscarSinResultadosRetornaVacio()</td>
+<td class="success">0.006s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Configuración H2 correcta</td>
+<td class="success">configuracionH2EstaOk()</td>
+<td class="success">0.006s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Debe buscar usuario por correo</td>
+<td class="success">debeBuscarUsuarioPorCorreo()</td>
+<td class="success">0.005s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Debe buscar usuario por nombre exacto</td>
+<td class="success">debeBuscarUsuarioPorNombreExacto()</td>
+<td class="success">0.005s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Debe buscar usuarios por nombre</td>
+<td class="success">debeBuscarUsuariosPorNombreParcial()</td>
+<td class="success">0.007s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Debe guardar y recuperar usuario</td>
+<td class="success">debeGuardarYRecuperarUsuario()</td>
+<td class="success">0.004s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Debe eliminar usuario por id</td>
+<td class="success">eliminarPorIdRemueveUsuario()</td>
+<td class="success">0.006s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Debe validar existencia de correo</td>
+<td class="success">existsByCorreoIndicaExistencia()</td>
+<td class="success">0.006s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">No debe permitir correos duplicados</td>
+<td class="success">noPermiteCorreosDuplicados()</td>
+<td class="success">0.013s</td>
+<td class="success">passed</td>
+</tr>
+<tr>
+<td class="success">Debe manejar paginación</td>
+<td class="success">paginacionLimites()</td>
+<td class="success">0.018s</td>
+<td class="success">passed</td>
+</tr>
+</table>
+</div>
+<div id="tab1" class="tab">
+<h2>Standard output</h2>
+<span class="code">
+<pre>2026-07-29T02:16:51.771-05:00  INFO 24732 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.tienda.ropa.backend.repository.UsuarioRepositoryTest]: UsuarioRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-07-29T02:16:51.776-05:00  INFO 24732 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.tienda.ropa.backend.BackendApplication for test class com.tienda.ropa.backend.repository.UsuarioRepositoryTest
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\' offset ? rows fetch first ? rows only
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0 where u1_0.correo=?
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0 where u1_0.nombre=?
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\' offset ? rows fetch first ? rows only
+Hibernate: select count(u1_0.id_usuario) from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\'
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\' offset ? rows fetch first ? rows only
+Hibernate: select count(u1_0.id_usuario) from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\'
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\' offset ? rows fetch first ? rows only
+Hibernate: select count(u1_0.id_usuario) from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\'
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\' offset ? rows fetch first ? rows only
+Hibernate: select count(u1_0.id_usuario) from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\'
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+2026-07-29T02:16:51.842-05:00  WARN 24732 --- [    Test worker] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Error: 23505, SQLState: 23505
+2026-07-29T02:16:51.842-05:00 ERROR 24732 --- [    Test worker] o.h.engine.jdbc.spi.SqlExceptionHelper   : Violación de indice de Unicidad ó Clave primaria: &quot;PUBLIC.CONSTRAINT_INDEX_3 ON PUBLIC.USUARIOS(CORREO NULLS FIRST) VALUES ( /* 12 */ 'dup@example.com' )&quot;
+Unique index or primary key violation: &quot;PUBLIC.CONSTRAINT_INDEX_3 ON PUBLIC.USUARIOS(CORREO NULLS FIRST) VALUES ( /* 12 */ 'dup@example.com' )&quot;; SQL statement:
+insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default) [23505-224]
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: select u1_0.id_usuario from usuarios u1_0 where u1_0.correo=? fetch first ? rows only
+Hibernate: select u1_0.id_usuario from usuarios u1_0 where u1_0.correo=? fetch first ? rows only
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0 where upper(u1_0.nombre) like upper(?) escape '\' offset ? rows fetch first ? rows only
+</pre>
+</span>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="http://www.gradle.org">Gradle 8.7</a> at 29 jul. 2026 02:17:01</p>
+</div>
+</div>
+</body>
+</html>
