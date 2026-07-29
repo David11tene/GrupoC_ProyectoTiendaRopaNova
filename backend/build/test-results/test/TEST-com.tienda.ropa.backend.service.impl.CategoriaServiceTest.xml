@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="CategoriaServiceImpl - Pruebas Unitarias (AAA + Mockito)" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-07-29T07:16:51" hostname="DESKTOP-J0CAMIC" time="0.215">
+  <properties/>
+  <testcase name="Debe listar todas las categorías" classname="com.tienda.ropa.backend.service.impl.CategoriaServiceTest" time="0.186"/>
+  <testcase name="Debe lanzar NotFoundException cuando la categoría no existe por ID" classname="com.tienda.ropa.backend.service.impl.CategoriaServiceTest" time="0.011"/>
+  <testcase name="Debe lanzar ConflictException si la categoría ya existe" classname="com.tienda.ropa.backend.service.impl.CategoriaServiceTest" time="0.008"/>
+  <testcase name="Debe crear una categoría correctamente si el nombre no existe" classname="com.tienda.ropa.backend.service.impl.CategoriaServiceTest" time="0.003"/>
+  <testcase name="Debe obtener categoría por ID exitosamente" classname="com.tienda.ropa.backend.service.impl.CategoriaServiceTest" time="0.0"/>
+  <testcase name="Debe actualizar categoría existente" classname="com.tienda.ropa.backend.service.impl.CategoriaServiceTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

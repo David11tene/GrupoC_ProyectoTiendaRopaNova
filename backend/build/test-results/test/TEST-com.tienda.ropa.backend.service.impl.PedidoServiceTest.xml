@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="PedidoServiceImpl - Pruebas Unitarias (AAA + Mockito)" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-07-29T07:16:52" hostname="DESKTOP-J0CAMIC" time="0.021">
+  <properties/>
+  <testcase name="crearPedido_usuarioNoEncontrado_lanzaExcepcion" classname="com.tienda.ropa.backend.service.impl.PedidoServiceTest" time="0.002"/>
+  <testcase name="crearPedido_validaDatosYRetornaRespuesta" classname="com.tienda.ropa.backend.service.impl.PedidoServiceTest" time="0.003"/>
+  <testcase name="crearPedido_stockInsuficiente_lanzaExcepcionYNoGuarda" classname="com.tienda.ropa.backend.service.impl.PedidoServiceTest" time="0.002"/>
+  <testcase name="crearPedido_datosValidos_verificaOrdenEjecucion" classname="com.tienda.ropa.backend.service.impl.PedidoServiceTest" time="0.007"/>
+  <testcase name="crearPedido_productoDesactivado_lanzaExcepcionYNoGuarda" classname="com.tienda.ropa.backend.service.impl.PedidoServiceTest" time="0.002"/>
+  <testcase name="crearPedido_usuarioDesactivado_lanzaExcepcionYNoEjecutaDependencias" classname="com.tienda.ropa.backend.service.impl.PedidoServiceTest" time="0.002"/>
+  <testcase name="crearPedido_datosValidos_guardaPedido_ArgumentCaptor" classname="com.tienda.ropa.backend.service.impl.PedidoServiceTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
