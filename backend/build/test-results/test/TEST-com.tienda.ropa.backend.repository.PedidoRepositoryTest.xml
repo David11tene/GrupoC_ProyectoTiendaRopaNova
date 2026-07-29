@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="PedidoRepository - Tests JPA" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-07-29T17:21:15" hostname="DESKTOP-DJQ7F5D" time="0.071">
+  <properties/>
+  <testcase name="Debe buscar pedidos por estado" classname="com.tienda.ropa.backend.repository.PedidoRepositoryTest" time="0.051"/>
+  <testcase name="Debe guardar y buscar pedidos por usuario" classname="com.tienda.ropa.backend.repository.PedidoRepositoryTest" time="0.017"/>
+  <system-out><![CDATA[2026-07-29T12:21:15.017-05:00  INFO 25260 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.tienda.ropa.backend.repository.PedidoRepositoryTest]: PedidoRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-07-29T12:21:15.034-05:00  INFO 25260 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.tienda.ropa.backend.BackendApplication for test class com.tienda.ropa.backend.repository.PedidoRepositoryTest
+Hibernate: select p1_0.id_pedido,p1_0.estado,p1_0.fecha,p1_0.total,p1_0.id_usuario from pedidos p1_0
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: insert into pedidos (estado,fecha,total,id_usuario,id_pedido) values (?,?,?,?,default)
+Hibernate: select p1_0.id_pedido,p1_0.estado,p1_0.fecha,p1_0.total,p1_0.id_usuario from pedidos p1_0 where p1_0.estado=?
+Hibernate: select p1_0.id_pedido,p1_0.estado,p1_0.fecha,p1_0.total,p1_0.id_usuario from pedidos p1_0 where p1_0.estado=?
+Hibernate: select p1_0.id_pedido,p1_0.estado,p1_0.fecha,p1_0.total,p1_0.id_usuario from pedidos p1_0
+Hibernate: select u1_0.id_usuario,u1_0.active,u1_0.contrasena,u1_0.correo,u1_0.nombre,u1_0.rol from usuarios u1_0
+Hibernate: insert into usuarios (active,contrasena,correo,nombre,rol,id_usuario) values (?,?,?,?,?,default)
+Hibernate: insert into pedidos (estado,fecha,total,id_usuario,id_pedido) values (?,?,?,?,default)
+Hibernate: select p1_0.id_pedido,p1_0.estado,p1_0.fecha,p1_0.total,p1_0.id_usuario from pedidos p1_0 where p1_0.id_usuario=?
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
