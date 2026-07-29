@@ -58,6 +58,9 @@ export const api = {
         create: (data) => post('/productos', data),
         update: (id, data) => put(`/productos/${id}`, data),
         deactivate: (id) => patch(`/productos/${id}/deactivate`),
+        // Lab 3 - WebFlux: promedio de ventas reactivo (usado en el badge admin)
+        promedioVentasStreamUrl: () => `${BASE}/reactivo/productos/promedio-ventas/stream`,
+        getPromedioVentas: () => get('/reactivo/productos/promedio-ventas'),
     },
 
     // ── Usuarios ──────────────────────────────────────────────────────
