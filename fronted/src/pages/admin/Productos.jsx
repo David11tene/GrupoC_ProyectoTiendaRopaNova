@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api, fmt } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
 
-const emptyForm = { nombre: '', precio: '', stock: '', categoriaId: '' };
+const emptyForm = { nombre: '', precio: '', stock: '', categoriaId: '', imagenUrl: '' };
 
 export default function Productos() {
     const [productos, setProductos] = useState([]);
@@ -61,6 +61,7 @@ export default function Productos() {
             precio: p.precio,
             stock: p.stock,
             categoriaId: cat ? cat.id : '',
+            imagenUrl: p.imagenUrl || '',
         });
     };
 
@@ -74,6 +75,7 @@ export default function Productos() {
                 precio: parseFloat(form.precio),
                 stock: parseInt(form.stock),
                 categoriaId: parseInt(form.categoriaId),
+                imagenUrl: form.imagenUrl.trim() || undefined,
             };
             if (editingId) {
                 await api.productos.update(editingId, payload);
@@ -134,8 +136,12 @@ export default function Productos() {
                                 </select>
                             </div>
                             <div className="form-group">
-                                <label>Nombre</label>
-                                <input className="form-control" name="nombre" value={form.nombre} onChange={handleChange} required minLength={3} maxLength={100} />
+                                <label>Nombre de la prenda</label>
+                                <input className="form-control" name="nombre" value={form.nombre} onChange={handleChange} required minLength={3} maxLength={100} placeholder="Ej. Camisa Oxford Blanca" />
+                            </div>
+                            <div className="form-group">
+                                <label>URL de la Imagen</label>
+                                <input className="form-control" name="imagenUrl" value={form.imagenUrl} onChange={handleChange} placeholder="https://ejemplo.com/prenda.jpg" />
                             </div>
                             <div className="form-row">
                                 <div className="form-group">
@@ -165,7 +171,7 @@ export default function Productos() {
                         <table className="data-table">
                             <thead>
                                 <tr>
-                                    <th>Producto</th>
+                                    <th>Prenda / Foto</th>
                                     <th>Precio / Stock</th>
                                     <th>Ventas promedio</th>
                                     <th>Estado</th>
@@ -175,9 +181,16 @@ export default function Productos() {
                             <tbody>
                                 {productos.map(p => (
                                     <tr key={p.id}>
-                                        <td>
-                                            <strong>{p.nombre}</strong>
-                                            <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>{p.categoria}</div>
+                                        <td style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <img
+                                                src={p.imagenUrl || 'https://images.unsplash.com/photo-1523381294911-8d3cead13475?w=500'}
+                                                alt={p.nombre}
+                                                style={{ width: '42px', height: '42px', borderRadius: '6px', objectFit: 'cover' }}
+                                            />
+                                            <div>
+                                                <strong>{p.nombre}</strong>
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>{p.categoria}</div>
+                                            </div>
                                         </td>
                                         <td>
                                             <strong>{fmt.price(p.precio)}</strong>

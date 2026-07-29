@@ -29,6 +29,14 @@ public class Producto {
     @JoinColumn(name = "id_categoria")
     private Categoria categoria;
 
+    public String getImagenUrl() {
+        return imagenUrl;
+    }
+
+    public void setImagenUrl(String imagenUrl) {
+        this.imagenUrl = imagenUrl;
+    }
+
     public Long getId() {
         return id;
     }
@@ -67,14 +75,6 @@ public class Producto {
 
     public void setActive(Boolean active) {
         this.active = active;
-    }
-
-    public String getImagenUrl() {
-        return imagenUrl;
-    }
-
-    public void setImagenUrl(String imagenUrl) {
-        this.imagenUrl = imagenUrl;
     }
 
     public Categoria getCategoria() {

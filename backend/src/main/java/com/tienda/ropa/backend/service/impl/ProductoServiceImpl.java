@@ -38,6 +38,7 @@ public class ProductoServiceImpl implements ProductoService {
             p.setNombre(request.getNombre());
             p.setPrecio(request.getPrecio());
             p.setStock(request.getStock());
+            p.setImagenUrl(request.getImagenUrl());
             p.setCategoria(categoria);
             p.setActive(true);
             p.setImagenUrl(request.getImagenUrl());
@@ -89,6 +90,9 @@ public class ProductoServiceImpl implements ProductoService {
             if (request.getStock() != null)
                 p.setStock(request.getStock());
 
+            if (request.getImagenUrl() != null)
+                p.setImagenUrl(request.getImagenUrl());
+
             if (request.getActive() != null)
                 p.setActive(request.getActive());
 
@@ -127,6 +131,7 @@ public class ProductoServiceImpl implements ProductoService {
         r.setNombre(p.getNombre());
         r.setPrecio(p.getPrecio());
         r.setStock(p.getStock());
+        r.setImagenUrl(p.getImagenUrl());
         r.setActive(p.getActive());
         r.setCategoria(p.getCategoria().getNombre());
         r.setImagenUrl(p.getImagenUrl());
