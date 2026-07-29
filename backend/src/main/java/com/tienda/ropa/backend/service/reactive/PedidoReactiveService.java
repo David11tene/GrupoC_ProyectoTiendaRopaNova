@@ -1,9 +1,13 @@
 package com.tienda.ropa.backend.service.reactive;
 
 import com.tienda.ropa.backend.domain.Pedido;
+import com.tienda.ropa.backend.domain.Producto;
 import com.tienda.ropa.backend.dto.detallepedido.DetallePedidoResponse;
 import com.tienda.ropa.backend.dto.pedido.PedidoResponse;
+import com.tienda.ropa.backend.dto.producto.ProductoPromedioVentaResponse;
+import com.tienda.ropa.backend.repository.DetallePedidoRepository;
 import com.tienda.ropa.backend.repository.PedidoRepository;
+import com.tienda.ropa.backend.repository.ProductoRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -20,13 +24,19 @@ public class PedidoReactiveService {
     private static final double IVA = 0.15;
 
     private final PedidoRepository pedidoRepository;
+    private final ProductoRepository productoRepository;
+    private final DetallePedidoRepository detallePedidoRepository;
     private final Sinks.Many<PedidoResponse> pedidoSink =
             Sinks.many().multicast().onBackpressureBuffer();
     private final Sinks.Many<String> processingSink =
             Sinks.many().multicast().onBackpressureBuffer();
 
-    public PedidoReactiveService(PedidoRepository pedidoRepository) {
+    public PedidoReactiveService(PedidoRepository pedidoRepository,
+                                  ProductoRepository productoRepository,
+                                  DetallePedidoRepository detallePedidoRepository) {
         this.pedidoRepository = pedidoRepository;
+        this.productoRepository = productoRepository;
+        this.detallePedidoRepository = detallePedidoRepository;
     }
 
     public void publishPedido(PedidoResponse pedidoResponse) {
@@ -45,12 +55,61 @@ public class PedidoReactiveService {
         return processingSink.asFlux();
     }
 
+    // NOTA DE DISEÑO: Spring Data JPA (a través de Hibernate/JDBC) es bloqueante por naturaleza.
+    // No existe un driver reactivo para MySQL/H2 en este proyecto (usaríamos R2DBC para eso),
+    // así que en lugar de bloquear un hilo del event-loop de Netty/WebFlux, envolvemos cada
+    // llamada al repositorio con Mono.fromCallable(...).subscribeOn(Schedulers.boundedElastic()).
+    // boundedElastic() usa un pool de hilos dedicado y acotado para trabajo bloqueante, dejando
+    // libres los hilos reactivos para el resto de la aplicación. Esto es una decisión de diseño
+    // consciente (un "reactive wrapper" sobre una capa de persistencia servlet/JPA), no un error
+    // ni un uso incorrecto de WebFlux.
     public Mono<Double> promedioPedidosAsync() {
         return Mono.fromCallable(() -> pedidoRepository.findAll().stream()
                         .mapToDouble(pedido -> pedido.getTotal() == null ? 0.0 : pedido.getTotal())
                         .average()
                         .orElse(0.0))
                 .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    /**
+     * Promedio de venta (subtotal por línea de pedido) de un producto específico.
+     * Útil de negocio: permite al admin ver qué tan bien vende un producto en tiempo real,
+     * sin tener que abrir un reporte aparte. Devuelve 0.0 si el producto nunca se ha vendido.
+     * Ver nota de diseño de Schedulers.boundedElastic() en promedioPedidosAsync().
+     */
+    public Mono<Double> promedioVentasPorProducto(Long productoId) {
+        return Mono.fromCallable(() -> detallePedidoRepository.averageSubtotalByProductoId(productoId))
+                .map(promedio -> promedio == null ? 0.0 : promedio)
+                .defaultIfEmpty(0.0)
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+    /**
+     * Promedio de venta de TODOS los productos activos, pensado para alimentar la tabla
+     * admin de Productos (badge/mini-indicador "Ventas promedio" por fila) vía SSE o polling.
+     * Los productos sin ventas registradas aparecen con promedio 0.0 y cantidadVentas 0
+     * en lugar de quedar fuera de la lista.
+     */
+    public Flux<ProductoPromedioVentaResponse> promedioVentasTodosLosProductos() {
+        return Mono.fromCallable(productoRepository::findAll)
+                .flatMapMany(Flux::fromIterable)
+                .subscribeOn(Schedulers.boundedElastic())
+                .map(this::toPromedioVentaResponse);
+    }
+
+    private ProductoPromedioVentaResponse toPromedioVentaResponse(Producto producto) {
+        List<com.tienda.ropa.backend.domain.DetallePedido> ventas =
+                detallePedidoRepository.findByProductoId(producto.getId());
+        double promedio = ventas.stream()
+                .mapToDouble(d -> d.getSubtotal() == null ? 0.0 : d.getSubtotal())
+                .average()
+                .orElse(0.0);
+        return new ProductoPromedioVentaResponse(
+                producto.getId(),
+                producto.getNombre(),
+                promedio,
+                (long) ventas.size()
+        );
     }
 
     public void procesarPedidosPorLotes() {
@@ -128,4 +187,3 @@ public class PedidoReactiveService {
         publishProcessing(message);
     }
 }
-

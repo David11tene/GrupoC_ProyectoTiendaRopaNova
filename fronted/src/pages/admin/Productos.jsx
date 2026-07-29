@@ -11,9 +11,36 @@ export default function Productos() {
     const [form, setForm] = useState(emptyForm);
     const [editingId, setEditingId] = useState(null);
     const [saving, setSaving] = useState(false);
+    // Lab 3 - WebFlux: promedio de ventas por producto, actualizado en vivo por SSE.
+    // Map: productoId -> { promedioVenta, cantidadVentas }
+    const [ventasPromedio, setVentasPromedio] = useState({});
     const { toast } = useToast();
 
     useEffect(() => { load(); }, []);
+
+    // Suscripción SSE al stream de "promedio de ventas" (Lab 3 - Spring WebFlux).
+    // Cada evento trae el promedio actualizado de UN producto; se van fusionando
+    // en el mapa para refrescar el badge de la tabla sin recargar la página.
+    useEffect(() => {
+        api.productos.getPromedioVentas()
+            .then(lista => {
+                const inicial = {};
+                (lista || []).forEach(v => { inicial[v.productoId] = v; });
+                setVentasPromedio(inicial);
+            })
+            .catch(() => { /* el badge simplemente no se muestra si falla */ });
+
+        const source = new EventSource(api.productos.promedioVentasStreamUrl());
+        source.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                setVentasPromedio(prev => ({ ...prev, [data.productoId]: data }));
+            } catch { /* ignorar eventos malformados */ }
+        };
+        source.onerror = () => { /* EventSource reintenta automáticamente */ };
+
+        return () => source.close();
+    }, []);
 
     const load = () => {
         Promise.all([api.productos.getAll(), api.categorias.getAll()])
@@ -140,6 +167,7 @@ export default function Productos() {
                                 <tr>
                                     <th>Producto</th>
                                     <th>Precio / Stock</th>
+                                    <th>Ventas promedio</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -154,6 +182,15 @@ export default function Productos() {
                                         <td>
                                             <strong>{fmt.price(p.precio)}</strong>
                                             <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>{p.stock} u.</div>
+                                        </td>
+                                        <td>
+                                            {ventasPromedio[p.id] && ventasPromedio[p.id].cantidadVentas > 0 ? (
+                                                <span className="badge badge-info" title={`${ventasPromedio[p.id].cantidadVentas} venta(s) registradas`}>
+                                                    {fmt.price(ventasPromedio[p.id].promedioVenta)} prom.
+                                                </span>
+                                            ) : (
+                                                <span className="badge badge-neutral">Sin ventas</span>
+                                            )}
                                         </td>
                                         <td>
                                             <span className={`badge ${p.active ? 'badge-success' : 'badge-danger'}`}>
@@ -174,7 +211,7 @@ export default function Productos() {
                                     </tr>
                                 ))}
                                 {productos.length === 0 && (
-                                    <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--muted)', padding: '2rem' }}>Sin productos</td></tr>
+                                    <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--muted)', padding: '2rem' }}>Sin productos</td></tr>
                                 )}
                             </tbody>
                         </table>
