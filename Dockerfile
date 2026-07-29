@@ -25,7 +25,7 @@ RUN chmod +x gradlew
 # -x buildFrontend -x npmInstall -x copyFrontend porque ya está copiado
 RUN ./gradlew clean bootJar --no-daemon -x test -x buildFrontend -x npmInstall -x copyFrontend
 
-# ── ETAPA 3: RUN ─────────────────────────────────────────────────────────────
+# ── ETAPA 3: RUN ─────────────────────────────────────────────────
 FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
