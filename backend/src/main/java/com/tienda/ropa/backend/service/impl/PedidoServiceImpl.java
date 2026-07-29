@@ -137,8 +137,10 @@ public class PedidoServiceImpl implements PedidoService {
             List<String> estadosValidos = List.of(
                     "PENDIENTE",
                     "APROBADO",
+                    "EN_PREPARACION",
                     "RECHAZADO",
                     "ENVIADO",
+                    "DESPACHADO",
                     "ENTREGADO"
             );
 
