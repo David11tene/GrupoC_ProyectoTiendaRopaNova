@@ -186,11 +186,6 @@ export default function Pedidos() {
                     <h2>Gestión de Pedidos y Logística</h2>
                     <p>Revisa las solicitudes de compra, aprueba o rechaza pedidos y coordina el envío de prendas</p>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <span className={`badge ${realtimeStatus === 'conectado' ? 'badge-success' : 'badge-neutral'}`} style={{ padding: '0.50rem 0.85rem' }}>
-                        Recepción de Pedidos: {realtimeStatus === 'conectado' ? 'En Tiempo Real' : 'Conectando...'}
-                    </span>
-                </div>
             </div>
 
             {/* Modal de Confirmación para Rechazo */}

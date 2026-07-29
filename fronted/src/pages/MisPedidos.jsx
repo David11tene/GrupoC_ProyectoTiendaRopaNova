@@ -34,7 +34,6 @@ export default function MisPedidos() {
 
             {pedidos.length === 0 ? (
                 <div className="empty-state">
-                    <div className="empty-icon">📦</div>
                     <h3>Aún no tienes pedidos</h3>
                     <p>Visita la tienda y realiza tu primera compra.</p>
                     <Link to="/" className="btn btn-accent" style={{ marginTop: '1.5rem' }}>

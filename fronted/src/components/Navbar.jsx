@@ -34,7 +34,7 @@ export default function Navbar() {
                     {isLoggedIn && !isAdmin && (
                         <>
                             <Link to="/cart" className={`cart-pill ${p === '/cart' ? 'active' : ''}`}>
-                                🛍 Carrito
+                                Carrito
                                 {totalItems > 0 && <span className="cart-count">{totalItems}</span>}
                             </Link>
                             <Link to="/mis-pedidos" className={`nav-link ${p === '/mis-pedidos' ? 'active' : ''}`}>
@@ -55,7 +55,7 @@ export default function Navbar() {
                     {isLoggedIn ? (
                         <>
               <span className="user-chip">
-                {isAdmin ? '⚡ ' : ''}
+                {isAdmin ? '' : ''}
                   <strong>{user.nombre}</strong>
               </span>
                             <button className="btn btn-logout" onClick={handleLogout}>

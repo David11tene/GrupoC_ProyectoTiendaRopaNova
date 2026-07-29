@@ -107,7 +107,6 @@ export default function Home() {
                     <div className="loading-center"><div className="loading-ring" /></div>
                 ) : activos.length === 0 ? (
                     <div className="empty-state">
-                        <div className="empty-icon">🔍</div>
                         <h3>Sin resultados</h3>
                         <p>No encontramos productos con ese nombre.</p>
                     </div>
@@ -115,8 +114,13 @@ export default function Home() {
                     <div className="products-grid">
                         {activos.map(p => (
                             <article key={p.id} className="product-card">
-                                <div className="product-img">
-                                    <span className="product-tag">{p.categoria}</span>
+                                <div className="product-img" style={{ position: 'relative', overflow: 'hidden' }}>
+                                    <img
+                                        src={p.imagenUrl || 'https://images.unsplash.com/photo-1523381294911-8d3cead13475?w=500'}
+                                        alt={p.nombre}
+                                        style={{ width: '100%', height: '220px', objectFit: 'cover', display: 'block' }}
+                                    />
+                                    <span className="product-tag" style={{ position: 'absolute', top: '10px', right: '10px' }}>{p.categoria}</span>
                                 </div>
                                 <div className="product-body">
                                     <div className="product-cat">{p.categoria}</div>
@@ -136,7 +140,7 @@ export default function Home() {
                                         {p.stock === 0
                                             ? 'Sin stock'
                                             : added[p.id]
-                                                ? '✓ Agregado'
+                                                ? 'Agregado'
                                                 : 'Añadir al carrito'}
                                     </button>
                                 </div>

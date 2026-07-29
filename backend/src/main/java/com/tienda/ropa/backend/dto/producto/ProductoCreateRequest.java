@@ -19,7 +19,17 @@ public class ProductoCreateRequest {
     @NotNull(message = "La categoría es obligatoria")
     private Long categoriaId;
 
+    private String imagenUrl;
+
     // GETTERS Y SETTERS
+
+    public String getImagenUrl() {
+        return imagenUrl;
+    }
+
+    public void setImagenUrl(String imagenUrl) {
+        this.imagenUrl = imagenUrl;
+    }
 
     public String getNombre() {
         return nombre;

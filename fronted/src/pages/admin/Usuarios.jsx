@@ -31,7 +31,7 @@ export default function Usuarios() {
                     ? prev.map(u => (u.id === usuarioNuevo.id ? usuarioNuevo : u))
                     : [usuarioNuevo, ...prev];
             });
-            toast(`🔔 Nuevo cliente registrado: ${usuarioNuevo.nombre} (${usuarioNuevo.correo})`, 'info');
+            toast(`Nuevo cliente registrado: ${usuarioNuevo.nombre} (${usuarioNuevo.correo})`, 'info');
         };
         userSource.onerror = () => setRealtimeStatus('reconectando');
 
@@ -105,7 +105,7 @@ export default function Usuarios() {
             {/* Encabezado Comercial */}
             <div className="admin-page-header">
                 <div>
-                    <h2>Gestión de Usuarios & Clientes</h2>
+                    <h2>Gestión de Usuarios y Clientes</h2>
                     <p>Administra los accesos de clientes y personal con actualización en tiempo real</p>
                 </div>
                 <span className="badge badge-neutral">
@@ -115,12 +115,8 @@ export default function Usuarios() {
 
             {/* Barra de Sincronización en Vivo */}
             <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-                <span className={`badge ${realtimeStatus === 'conectado' ? 'badge-success' : 'badge-neutral'}`} style={{ fontSize: '0.85rem', padding: '0.45rem 0.85rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    🟢 Monitoreo de Registros: {realtimeStatus === 'conectado' ? 'En Tiempo Real' : 'Reconectando...'}
-                </span>
-
                 <span className="badge badge-info" style={{ fontSize: '0.85rem', padding: '0.45rem 0.85rem' }}>
-                    👥 Clientes Registrados: <strong>{conteoTotal === null ? usuarios.length : conteoTotal}</strong>
+                    Clientes Registrados: <strong>{conteoTotal === null ? usuarios.length : conteoTotal}</strong>
                 </span>
             </div>
 

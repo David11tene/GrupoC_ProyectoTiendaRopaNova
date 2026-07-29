@@ -38,7 +38,6 @@ export default function Cart() {
         return (
             <div className="container page-wrapper">
                 <div className="empty-state" style={{ maxWidth: 480, margin: '4rem auto' }}>
-                    <div className="empty-icon">🛍</div>
                     <h3>Tu carrito está vacío</h3>
                     <p>Explora el catálogo y elige tus prendas favoritas</p>
                     <Link to="/" className="btn btn-accent" style={{ marginTop: '1.5rem' }}>
@@ -61,8 +60,6 @@ export default function Cart() {
                 <div>
                     {cart.map(item => (
                         <div key={item.id} className="cart-item">
-                            <div className="cart-thumb">👕</div>
-
                             <div className="cart-item-info">
                                 <div className="cart-item-name">{item.nombre}</div>
                                 <div className="cart-item-meta">{item.categoria} · {fmt.price(item.precio)} c/u</div>
@@ -79,7 +76,7 @@ export default function Cart() {
                             </div>
 
                             <button className="btn btn-ghost btn-sm" onClick={() => removeFromCart(item.id)} title="Quitar">
-                                ✕
+                                Eliminar
                             </button>
                         </div>
                     ))}

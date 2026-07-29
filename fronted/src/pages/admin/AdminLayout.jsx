@@ -2,10 +2,10 @@ import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
 
 const LINKS = [
-    { to: '/admin/productos', icon: '👕 ', label: 'Productos' },
-    { to: '/admin/categorias', icon: '🏷 ', label: 'Categorías' },
-    { to: '/admin/usuarios', icon: '👤 ', label: 'Usuarios' },
-    { to: '/admin/pedidos', icon: '📦 ', label: 'Pedidos' },
+    { to: '/admin/productos', label: 'Productos' },
+    { to: '/admin/categorias', label: 'Categorías' },
+    { to: '/admin/usuarios', label: 'Usuarios' },
+    { to: '/admin/pedidos', label: 'Pedidos' },
 ];
 
 export default function AdminLayout() {
@@ -20,7 +20,6 @@ export default function AdminLayout() {
                             to={l.to}
                             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
                         >
-                            <span>{l.icon}</span>
                             {l.label}
                         </NavLink>
                     ))}
