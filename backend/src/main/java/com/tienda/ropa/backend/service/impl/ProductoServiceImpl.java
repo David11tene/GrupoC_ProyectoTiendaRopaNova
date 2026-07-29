@@ -41,6 +41,7 @@ public class ProductoServiceImpl implements ProductoService {
             p.setImagenUrl(request.getImagenUrl());
             p.setCategoria(categoria);
             p.setActive(true);
+            p.setImagenUrl(request.getImagenUrl());
 
             return toResponse(repo.save(p));
         }).subscribeOn(Schedulers.boundedElastic());
@@ -95,6 +96,9 @@ public class ProductoServiceImpl implements ProductoService {
             if (request.getActive() != null)
                 p.setActive(request.getActive());
 
+            if (request.getImagenUrl() != null)
+                p.setImagenUrl(request.getImagenUrl());
+
             if (request.getCategoriaId() != null) {
                 Categoria categoria = categoriaRepo.findById(
                         request.getCategoriaId()
@@ -130,6 +134,7 @@ public class ProductoServiceImpl implements ProductoService {
         r.setImagenUrl(p.getImagenUrl());
         r.setActive(p.getActive());
         r.setCategoria(p.getCategoria().getNombre());
+        r.setImagenUrl(p.getImagenUrl());
 
         return r;
     }

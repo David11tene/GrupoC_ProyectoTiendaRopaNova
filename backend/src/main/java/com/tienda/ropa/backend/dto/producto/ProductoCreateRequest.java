@@ -19,6 +19,10 @@ public class ProductoCreateRequest {
     @NotNull(message = "La categoría es obligatoria")
     private Long categoriaId;
 
+<<<<<<< HEAD
+=======
+    @Size(max = 500)
+>>>>>>> origin/main
     private String imagenUrl;
 
     // GETTERS Y SETTERS
