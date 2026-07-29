@@ -2,18 +2,26 @@ import React, { useState, useEffect, useRef } from 'react';
 import { api, fmt } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
 
-// Flujo comercial de estados: PENDIENTE -> APROBADO -> ENVIADO -> ENTREGADO (o RECHAZADO)
+// Flujo comercial de estados: PENDIENTE -> EN_PREPARACION -> DESPACHADO -> ENTREGADO (o RECHAZADO)
 const NEXT_ESTADOS = {
     PENDIENTE: [
-        { key: 'APROBADO', label: '✓ Aprobar Pedido', cls: 'btn-success' },
-        { key: 'RECHAZADO', label: '✕ Rechazar Pedido', cls: 'btn-danger' }
+        { key: 'EN_PREPARACION', label: 'Iniciar Preparación y Empaquetado', cls: 'btn-success' },
+        { key: 'RECHAZADO', label: 'Rechazar Pedido', cls: 'btn-danger' }
     ],
     APROBADO: [
-        { key: 'ENVIADO', label: '🚚 Marcar como Enviado', cls: 'btn-accent' },
-        { key: 'RECHAZADO', label: '✕ Cancelar Pedido', cls: 'btn-outline' }
+        { key: 'EN_PREPARACION', label: 'Iniciar Preparación y Empaquetado', cls: 'btn-success' },
+        { key: 'DESPACHADO', label: 'Marcar como Despachado', cls: 'btn-accent' },
+        { key: 'RECHAZADO', label: 'Cancelar Pedido', cls: 'btn-outline' }
+    ],
+    EN_PREPARACION: [
+        { key: 'DESPACHADO', label: 'Marcar como Despachado y en Ruta', cls: 'btn-accent' },
+        { key: 'RECHAZADO', label: 'Cancelar Pedido', cls: 'btn-outline' }
     ],
     ENVIADO: [
-        { key: 'ENTREGADO', label: '📦 Confirmar Entrega', cls: 'btn-success' }
+        { key: 'ENTREGADO', label: 'Confirmar Entrega al Cliente', cls: 'btn-success' }
+    ],
+    DESPACHADO: [
+        { key: 'ENTREGADO', label: 'Confirmar Entrega al Cliente', cls: 'btn-success' }
     ],
     RECHAZADO: [],
     ENTREGADO: [],
@@ -53,7 +61,7 @@ export default function Pedidos() {
                     ? prev.map(p => (p.id === pedidoNuevo.id ? pedidoNuevo : p))
                     : [pedidoNuevo, ...prev];
             });
-            toast(`🔔 ¡Nueva compra recibida! Pedido #${pedidoNuevo.id}`, 'info');
+            toast(`¡Nueva compra recibida! Pedido #${pedidoNuevo.id}`, 'info');
         };
         source.onerror = () => setRealtimeStatus('reconectando');
 
@@ -115,7 +123,7 @@ export default function Pedidos() {
         setProcesandoBodega(true);
         try {
             await api.pedidos.procesarLotes(capacidadLote, 400);
-            toast(`📦 Envíos autorizados y transferidos a Bodega (Paquetes de ${capacidadLote} órdenes)`, 'success');
+            toast(`Envíos autorizados y transferidos a Bodega (Paquetes de ${capacidadLote} órdenes)`, 'success');
         } catch (err) {
             toast(err.message || 'Error al enviar a Bodega', 'error');
         } finally {
@@ -135,10 +143,12 @@ export default function Pedidos() {
         try {
             await api.pedidos.updateEstado(id, nuevoEstado);
             const statusLabels = {
-                APROBADO: '✅ Pedido Aprobado exitosamente',
-                RECHAZADO: '❌ Pedido Rechazado',
-                ENVIADO: '🚚 Pedido marcado como En Tránsito / Enviado',
-                ENTREGADO: '📦 Entrega de Pedido confirmada',
+                APROBADO: 'Pedido Aprobado exitosamente',
+                EN_PREPARACION: 'Pedido en Preparación y Empaquetado',
+                RECHAZADO: 'Pedido Rechazado y Stock Reincorporado',
+                ENVIADO: 'Pedido marcado como Despachado y en Ruta',
+                DESPACHADO: 'Pedido marcado como Despachado y en Ruta',
+                ENTREGADO: 'Entrega de Pedido confirmada',
             };
             toast(`${statusLabels[nuevoEstado] || 'Pedido actualizado'} (Orden #${id})`, 'success');
             setConfirmModal(null);
@@ -150,11 +160,11 @@ export default function Pedidos() {
 
     // Métricas para tarjetas superiores
     const totalPendientes = pedidos.filter(p => p.estado === 'PENDIENTE').length;
-    const totalAprobados = pedidos.filter(p => p.estado === 'APROBADO').length;
-    const totalEnviados = pedidos.filter(p => p.estado === 'ENVIADO').length;
+    const totalPreparacion = pedidos.filter(p => p.estado === 'EN_PREPARACION' || p.estado === 'APROBADO').length;
+    const totalDespachados = pedidos.filter(p => p.estado === 'DESPACHADO' || p.estado === 'ENVIADO').length;
 
     // Filtros comerciales
-    const FILTROS = ['TODOS', 'PENDIENTE', 'APROBADO', 'ENVIADO', 'ENTREGADO', 'RECHAZADO'];
+    const FILTROS = ['TODOS', 'PENDIENTE', 'EN_PREPARACION', 'DESPACHADO', 'ENTREGADO', 'RECHAZADO'];
     
     let listaBase = despachoItems.length > 0 ? despachoItems : pedidos;
     if (filter !== 'TODOS') {
@@ -173,12 +183,12 @@ export default function Pedidos() {
             {/* Encabezado Comercial Principal */}
             <div className="admin-page-header">
                 <div>
-                    <h2>Gestión de Pedidos & Logística</h2>
+                    <h2>Gestión de Pedidos y Logística</h2>
                     <p>Revisa las solicitudes de compra, aprueba o rechaza pedidos y coordina el envío de prendas</p>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                     <span className={`badge ${realtimeStatus === 'conectado' ? 'badge-success' : 'badge-neutral'}`} style={{ padding: '0.50rem 0.85rem' }}>
-                        🟢 Recepción de Pedidos: {realtimeStatus === 'conectado' ? 'En Tiempo Real' : 'Conectando...'}
+                        Recepción de Pedidos: {realtimeStatus === 'conectado' ? 'En Tiempo Real' : 'Conectando...'}
                     </span>
                 </div>
             </div>
@@ -203,7 +213,7 @@ export default function Pedidos() {
                         width: '90%',
                         boxShadow: 'var(--shadow-lg)'
                     }}>
-                        <h3 style={{ margin: '0 0 0.75rem 0', color: 'var(--danger)' }}>⚠️ Confirmar Acción</h3>
+                        <h3 style={{ margin: '0 0 0.75rem 0', color: 'var(--danger)' }}>Confirmar Acción</h3>
                         <p style={{ fontSize: '0.9rem', marginBottom: '1.25rem' }}>
                             ¿Estás seguro de que deseas <strong>{confirmModal.accionTexto}</strong> (# {confirmModal.id})? Esta acción cambiará el estado de la compra.
                         </p>
@@ -240,21 +250,21 @@ export default function Pedidos() {
                 <div style={{ background: 'var(--card)', border: '1px solid var(--border)', padding: '1rem 1.25rem', borderRadius: '10px' }}>
                     <span style={{ fontSize: '0.78rem', color: 'var(--muted)', fontWeight: 600, textTransform: 'uppercase' }}>Por Aprobar (Pendientes)</span>
                     <h3 style={{ margin: '0.2rem 0 0 0', fontSize: '1.6rem', color: totalPendientes > 0 ? '#eab308' : 'inherit' }}>
-                        {totalPendientes} {totalPendientes > 0 && '⏳'}
+                        {totalPendientes}
                     </h3>
                 </div>
 
                 <div style={{ background: 'var(--card)', border: '1px solid var(--border)', padding: '1rem 1.25rem', borderRadius: '10px' }}>
-                    <span style={{ fontSize: '0.78rem', color: 'var(--muted)', fontWeight: 600, textTransform: 'uppercase' }}>Aprobados / En Preparación</span>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--muted)', fontWeight: 600, textTransform: 'uppercase' }}>En Preparación y Empaquetado</span>
                     <h3 style={{ margin: '0.2rem 0 0 0', fontSize: '1.6rem', color: 'var(--success)' }}>
-                        {totalAprobados} ✓
+                        {totalPreparacion}
                     </h3>
                 </div>
 
                 <div style={{ background: 'var(--card)', border: '1px solid var(--border)', padding: '1rem 1.25rem', borderRadius: '10px' }}>
-                    <span style={{ fontSize: '0.78rem', color: 'var(--muted)', fontWeight: 600, textTransform: 'uppercase' }}>En Tránsito / Envíos</span>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--muted)', fontWeight: 600, textTransform: 'uppercase' }}>Despachados y en Ruta</span>
                     <h3 style={{ margin: '0.2rem 0 0 0', fontSize: '1.6rem', color: '#3b82f6' }}>
-                        {totalEnviados} 🚚
+                        {totalDespachados}
                     </h3>
                 </div>
 
@@ -278,7 +288,7 @@ export default function Pedidos() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
                     <div>
                         <h4 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            📦 Centro de Organización & Empaquetado de Envíos
+                            Centro de Organización y Empaquetado de Envíos
                         </h4>
                         <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.8rem', color: 'var(--muted)' }}>
                             Organiza y agrupa los pedidos confirmados en paquetes de distribución para agilizar las entregas
@@ -313,11 +323,11 @@ export default function Pedidos() {
                     <div style={{ display: 'flex', gap: '0.6rem', marginTop: '1.2rem', flexWrap: 'wrap' }}>
                         {!despachando ? (
                             <button className="btn btn-accent btn-sm" onClick={handleIniciarCargaLotes}>
-                                ▶ Agrupar Envíos en Bloques de {capacidadLote}
+                                Agrupar Envíos en Bloques de {capacidadLote}
                             </button>
                         ) : (
                             <button className="btn btn-danger btn-sm" onClick={handleDetenerCarga}>
-                                ⏹ Pausar Agrupación
+                                Pausar Agrupación
                             </button>
                         )}
 
@@ -326,7 +336,7 @@ export default function Pedidos() {
                             onClick={handleProcesarDespachosMasivos}
                             disabled={procesandoBodega}
                         >
-                            {procesandoBodega ? 'Procesando Envíos...' : '⚡ Transferir Paquetes a Distribución'}
+                            {procesandoBodega ? 'Procesando Envíos...' : 'Transferir Paquetes a Distribución'}
                         </button>
 
                         {despachoItems.length > 0 && (
@@ -341,7 +351,7 @@ export default function Pedidos() {
                 {despachando && (
                     <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.4rem' }}>
-                            <span>📦 Paquete de Envío Activo: <strong>#{loteActual}</strong></span>
+                            <span>Paquete de Envío Activo: <strong>#{loteActual}</strong></span>
                             <span>Órdenes organizadas: <strong>{despachoItems.length}</strong> (Bloques de {capacidadLote})</span>
                         </div>
                         <div style={{ width: '100%', height: '8px', background: 'var(--border)', borderRadius: '4px', overflow: 'hidden' }}>
@@ -394,7 +404,7 @@ export default function Pedidos() {
                     <input
                         type="text"
                         className="form-control"
-                        placeholder="🔍 Buscar por # Pedido o Cliente..."
+                        placeholder="Buscar por # Pedido o Cliente..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         style={{ fontSize: '0.82rem', padding: '0.45rem 0.75rem' }}
@@ -417,7 +427,7 @@ export default function Pedidos() {
                             <th>Prendas Solicitadas</th>
                             <th>Monto Total</th>
                             <th>Estado Actual</th>
-                            <th>Acciones de Aprobación & Despacho</th>
+                            <th>Acciones de Aprobación y Despacho</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -437,7 +447,7 @@ export default function Pedidos() {
                                             <strong>#{p.id}</strong>
                                             {esPendiente && (
                                                 <span style={{ display: 'block', fontSize: '0.70rem', color: '#d97706', fontWeight: 600 }}>
-                                                    ⚡ Requiere Aprobación
+                                                    Requiere Aprobación
                                                 </span>
                                             )}
                                         </td>
@@ -458,7 +468,7 @@ export default function Pedidos() {
                                                 style={{ fontSize: '0.78rem', padding: '0.3rem 0.65rem', borderRadius: '6px' }}
                                                 onClick={() => setExpandedId(isExpanded ? null : p.id)}
                                             >
-                                                {isExpanded ? '▲ Ocultar Detalles' : `👁️ Ver Prendas ${itemsCount > 0 ? `(${itemsCount})` : ''}`}
+                                                {isExpanded ? 'Ocultar Detalles' : `Ver Prendas ${itemsCount > 0 ? `(${itemsCount})` : ''}`}
                                             </button>
                                         </td>
                                         <td><strong style={{ color: 'var(--accent)', fontSize: '0.95rem' }}>{fmt.price(p.total)}</strong></td>
@@ -478,7 +488,7 @@ export default function Pedidos() {
                                                 </div>
                                             ) : (
                                                 <span style={{ fontSize: '0.78rem', color: 'var(--muted)', fontWeight: 500 }}>
-                                                    {p.estado === 'ENTREGADO' ? '✓ Pedido Completado' : '✕ Pedido Cancelado/Rechazado'}
+                                                    {p.estado === 'ENTREGADO' ? 'Pedido Completado' : 'Pedido Cancelado/Rechazado'}
                                                 </span>
                                             )}
                                         </td>
@@ -497,7 +507,7 @@ export default function Pedidos() {
                                                 }}>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
                                                         <strong style={{ fontSize: '0.9rem', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                            👗 Desglose de Prendas Compradas — Pedido #{p.id}
+                                                            Desglose de Prendas Compradas — Pedido #{p.id}
                                                         </strong>
                                                         <span className="badge badge-neutral" style={{ fontSize: '0.75rem' }}>
                                                             Cliente: {p.usuario} | Fecha de Compra: {fmt.date(p.fecha)}
@@ -533,11 +543,11 @@ export default function Pedidos() {
                                                                             <td style={{ padding: '8px 12px' }}>
                                                                                 {d.stockDisponible !== undefined && d.stockDisponible !== null ? (
                                                                                     <span className={`badge ${d.stockDisponible > 0 ? 'badge-success' : 'badge-danger'}`} style={{ fontSize: '0.78rem' }}>
-                                                                                        {d.stockDisponible > 0 ? `✓ ${d.stockDisponible} u. Disponibles` : '❌ Agotado'}
+                                                                                        {d.stockDisponible > 0 ? `${d.stockDisponible} u. Disponibles` : 'Agotado'}
                                                                                     </span>
                                                                                 ) : (
                                                                                     <span className="badge badge-success" style={{ fontSize: '0.78rem' }}>
-                                                                                        ✓ Stock Verificado
+                                                                                        Stock Verificado
                                                                                     </span>
                                                                                 )}
                                                                             </td>
@@ -563,22 +573,22 @@ export default function Pedidos() {
                                                             <div style={{
                                                                 marginTop: '0.75rem',
                                                                 padding: '0.65rem 0.85rem',
-                                                                background: 'rgba(234, 179, 8, 0.08)',
-                                                                borderLeft: '4px solid #d97706',
+                                                                background: 'rgba(59, 130, 246, 0.08)',
+                                                                borderLeft: '4px solid #3b82f6',
                                                                 borderRadius: '4px',
                                                                 fontSize: '0.78rem',
                                                                 color: 'var(--ink-soft)'
                                                             }}>
-                                                                <strong>💡 Lógica de Negocio de Validación:</strong>
+                                                                <strong>Estado y Validación del Inventario:</strong>
                                                                 <ul style={{ margin: '0.2rem 0 0 1.2rem', padding: 0 }}>
-                                                                    <li><strong>Aprobar Pedido:</strong> Las prendas están en stock reservado. Al aprobar, el pedido avanza al centro de preparación y empaquetado para despacho.</li>
-                                                                    <li><strong>Rechazar Pedido:</strong> Cancela la compra y libera automáticamente las unidades reservadas devolviéndolas al stock general de la tienda.</li>
+                                                                    <li><strong>Iniciar Preparación y Empaquetado:</strong> Confirma la asignación de prendas en almacén y la elaboración del paquete de envío.</li>
+                                                                    <li><strong>Rechazar o Cancelar Pedido:</strong> Cancela la orden e incrementa de forma automática las unidades de vuelta al inventario disponible.</li>
                                                                 </ul>
                                                             </div>
                                                         </>
                                                     ) : (
                                                         <div style={{ fontSize: '0.85rem', color: 'var(--muted)', padding: '0.75rem 0', textAlign: 'center' }}>
-                                                            ℹ️ Compra registrada con monto total de ({fmt.price(p.total)}).
+                                                            Compra registrada con monto total de ({fmt.price(p.total)}).
                                                         </div>
                                                     )}
 
