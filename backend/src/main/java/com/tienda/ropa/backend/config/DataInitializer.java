@@ -58,17 +58,25 @@ public class DataInitializer {
             Categoria accesorios = categoria(categoriaRepo, "Accesorios");
 
             // Productos
-            Producto p1 = producto(productoRepo, "Camisa Oxford Blanca", 29.99, 50, camisas);
-            Producto p2 = producto(productoRepo, "Camisa Lino Azul Marino", 34.99, 30, camisas);
-            Producto p3 = producto(productoRepo, "Camisa Cuadros Flannel", 27.99, 25, camisas);
+            Producto p1 = producto(productoRepo, "Camisa Oxford Blanca", 29.99, 50, camisas,
+                    "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=600&q=80");
+            Producto p2 = producto(productoRepo, "Camisa Lino Azul Marino", 34.99, 30, camisas,
+                    "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=600&q=80");
+            Producto p3 = producto(productoRepo, "Camisa Cuadros Flannel", 27.99, 25, camisas,
+                    "https://images.unsplash.com/photo-1620012253295-c15cc3e65df4?w=600&q=80");
 
-            Producto p4 = producto(productoRepo, "Pantalón Chino Beige", 49.99, 40, pantalones);
-            Producto p5 = producto(productoRepo, "Jeans Slim Fit Oscuro", 59.99, 35, pantalones);
+            Producto p4 = producto(productoRepo, "Pantalón Chino Beige", 49.99, 40, pantalones,
+                    "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600&q=80");
+            Producto p5 = producto(productoRepo, "Jeans Slim Fit Oscuro", 59.99, 35, pantalones,
+                    "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=600&q=80");
 
-            Producto p6 = producto(productoRepo, "Vestido Floral Verano", 44.99, 20, vestidos);
-            Producto p7 = producto(productoRepo, "Vestido Midi Negro", 54.99, 15, vestidos);
+            Producto p6 = producto(productoRepo, "Vestido Floral Verano", 44.99, 20, vestidos,
+                    "https://images.unsplash.com/photo-1612336307429-8a898d10e223?w=600&q=80");
+            Producto p7 = producto(productoRepo, "Vestido Midi Negro", 54.99, 15, vestidos,
+                    "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600&q=80");
 
-            Producto p8 = producto(productoRepo, "Cinturón Cuero Café", 19.99, 5, accesorios);
+            Producto p8 = producto(productoRepo, "Cinturón Cuero Café", 19.99, 5, accesorios,
+                    "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&q=80");
 
             // Pedidos menores a $100 para demostrar filtro y backpressure.
             crearPedido(pedidoRepo, productoRepo, cliente, p1, 2); // $59.98
@@ -93,7 +101,8 @@ public class DataInitializer {
             String nombre,
             double precio,
             int stock,
-            Categoria categoria
+            Categoria categoria,
+            String imagenUrl
     ) {
         Producto p = new Producto();
         p.setNombre(nombre);
@@ -101,6 +110,7 @@ public class DataInitializer {
         p.setStock(stock);
         p.setActive(true);
         p.setCategoria(categoria);
+        p.setImagenUrl(imagenUrl);
 
         return repo.save(p);
     }
